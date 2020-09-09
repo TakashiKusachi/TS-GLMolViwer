@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>index page</title>
+        <link rel="stylesheet" href="style/main.css">
+    </head>
+    <body>
+        <header id="header-contents">
+            <ul class="header_single">
+                <li>
+                    File
+                    <ul> 
+                        <li><label>New<input id="new" type="button"></label></li>
+                        <li><label>OpenFile<input id="file" type="file" multiple></label></li>
+                    </ul>
+                </li>
+                <li>
+                    Viewer
+                    <ul>
+                        <li><label>BackGraund<input id="back" type="color"></label></li>
+                    </ul>
+                </li>
+            </ul>
+        </header>
+
+        <div id="main-contents">
+            <div class="content" id="view-area">
+                <canvas id="gl_canvas">Canvas要素の聞かないブラウザは対象外です。無理ぽ</canvas>
+            </div>
+            <div class="content" id="control-area">
+            </div>
+        </div>
+        <div id="fotter-contents">
+            test
+        </div>
+        <script src="build/main.js" type="text/javascript"></script>
+    </body>
+</html>
