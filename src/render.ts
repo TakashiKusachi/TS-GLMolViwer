@@ -1,11 +1,17 @@
 
 import * as THREE from 'three';
-import { Object3D, Vector3, Raycaster, Vector2 } from 'three';
+import { Object3D, Vector3, Raycaster, Vector2, GridHelper, Group } from 'three';
 import Stats from 'three/examples/jsm/libs/stats.module';
+import {Worker,spawn,Thread} from 'threads'
+import { registerSerializer } from "threads"
 
 import { System,Position,ElemType,Atom } from './system';
 import {cube_,bond_radius,default_colors} from "./parameters"
 import {MatStdControl} from "./control/MatStdControl"
+
+import {GroupSerializerImplementation} from "./worker/serializer"
+
+registerSerializer(GroupSerializerImplementation);
 
 export interface SelectedEvent{
     obj: Object3D;
@@ -210,87 +216,34 @@ class AtomicRender extends Render{
         this.stop();
         this.clearScene();
         this.system = system;
-        let ret = new Promise<void>((resolve,reject)=>{
-            this.drowSystem2Scene();
+        let ret = new Promise<void>(async (resolve,reject)=>{
+            await this.drowSystem2Scene();
             this.start();
             resolve();
         });
         return ret;
     }
 
-    drowSystem2Scene(){
+    async drowSystem2Scene(){
         let system = this.system as System;
         let accPos = new THREE.Vector3(0,0,0);
+
+        let objLoader = new THREE.ObjectLoader()
+
+        let atomdrower = await spawn(new Worker("./worker/atomdrower.ts"))
+        //let bonddrower = await spawn(new Worker("./worker/bonddrower.ts"))
         
-        this.__drowAtom(system,accPos);
-        this.__drowBond(system,accPos);
-
-    }
-
-    __drowAtom(system:System,accPos: Vector3){
-        this.gatomics = new THREE.Group();
-        let iter_atom = system.getAtoms();
-
-        for(let node = iter_atom.next();node.done == false;node=iter_atom.next()){
-
-            let atom = node.value;
-
-            let pos = atom.position;
-            let elem = atom.element;
-            let name = atom.name;
-            
-            const cube = new THREE.SphereGeometry(0.5,cube_,cube_);
-
-            var meshopt = {}
-            meshopt = {color:default_colors[elem]}
-            const material = new THREE.MeshStandardMaterial(meshopt);
-            
-            const box = new THREE.Mesh(cube, material);
-
-            box.name = name;
-            box.position.set(pos[0],pos[1],pos[2]);
-            accPos = accPos.add(box.position);
-
-            this.gatomics?.add(box);
-        }
-        accPos = accPos.divideScalar(this.gatomics.children.length);
-
-        this.gatomics.translateX(-accPos.x);
-        this.gatomics.translateY(-accPos.y);
-        this.gatomics.translateZ(-accPos.z);
-        this.gatomics.name = "Groups";
+        let groups= await atomdrower(system) as THREE.Group;
+        //let gbonds = await bonddrower(system) as THREE.Group;
+        console.log("Drow",groups);
+        this.gatomics = groups.children.find((value)=>{return value.name === "AtomicsGroup"}) as Group;
+        this.gbond = groups.children.find((value)=>{return value.name === "BondsGroup"}) as Group;
 
         this.addObject(this.gatomics);
-    }
-
-    __drowBond(system:System,accPos:Vector3){
-        this.gbond = new THREE.Group();
-        let iter_bond = system.getBond();
-        for(let node = iter_bond.next();node.done == false;node=iter_bond.next()){
-            let bond = node.value;
-            if(bond.atoma.index > bond.atomb.index){continue;}
-
-            let bond_vec = new THREE.Vector3(bond.vector[0],bond.vector[1],bond.vector[2]);
-            let bond_centor = new THREE.Vector3(bond.position[0],bond.position[1],bond.position[2])
-            const cube = new THREE.CylinderGeometry(bond_radius,bond_radius,bond_vec.length(),10,1,true);
-            const material = new THREE.MeshStandardMaterial({color:0xf0f0f0});
-
-            const box = new THREE.Mesh(cube,material);
-            box.position.set(bond_centor.x,bond_centor.y,bond_centor.z);
-
-            let angle = bond_vec.angleTo(new THREE.Vector3(0,1,0));
-            let nm_bond_vec = bond_vec.cross(new THREE.Vector3(0,1,0)).normalize();
-            let quaternion = new THREE.Quaternion();
-            quaternion.setFromAxisAngle(nm_bond_vec,-angle);
-            box.rotation.setFromQuaternion(quaternion)
-            this.gbond?.add(box);
-
-        }
-        
-        this.gbond.translateX(-accPos.x);
-        this.gbond.translateY(-accPos.y);
-        this.gbond.translateZ(-accPos.z);
         this.addObject(this.gbond);
+
+        Thread.terminate(atomdrower);
+
     }
 
     calcCenter():THREE.Vector3{

@@ -1,6 +1,7 @@
 import { stringify } from "querystring";
 import { DH_NOT_SUITABLE_GENERATOR } from "constants";
 import { PositionalAudio } from "three";
+import { isNull } from "util";
 
 enum ElemType{
     ANY,H,He,Li,Be,B,C,N,O,F,Ne,
@@ -103,10 +104,33 @@ class System{
     private positions: Array<Position> = [];
     private elements: Array<ElemType> = [];
     
-    private bond_atoms: Array<Array<Atom>> = [];
+    private bond_atoms: Array<Array<number>> = [];
     private bond_types: Array<BOND_TYPE> = [];
 
-    constructor(){
+    /**
+     * 
+     * @param ord_system 
+     * @param need_copy threads.jsでworkerにクラスを投げるとメンバ変数だけが送られ、クラスの体をなしていないため、メンバ関数が呼べないという面倒な問題が起こる。masterからすればコピーされたobjectなので、クラスに格納するだけのmethodがほしいので用意。通常はtrueだと考えられます。
+     * 
+     * @Notes need_copyしても、positionとかbond_atomsのような多重配列の場合、二次参照先は同じオブジェクトを参照するため、注意が必要です。
+     */
+    constructor(ord_system:System|null = null,need_copy=true){
+        if(isNull(ord_system))return;
+        if(need_copy){
+            this.N_undef_atoms = ord_system.N_undef_atoms;
+            this.names = ord_system.names.concat();
+            this.positions = ord_system.positions.concat();
+            this.elements = ord_system.elements.concat();
+            this.bond_atoms = ord_system.bond_atoms.concat();
+            this.bond_types = ord_system.bond_types.concat();
+        }else{
+            this.N_undef_atoms = ord_system.N_undef_atoms;
+            this.names = ord_system.names;
+            this.positions = ord_system.positions;
+            this.elements = ord_system.elements;
+            this.bond_atoms = ord_system.bond_atoms;
+            this.bond_types = ord_system.bond_types;
+        }
     }
 
     add_atom(name: Name|null, position:Position, element:ElemType){
@@ -126,11 +150,11 @@ class System{
 
     add_bond(atoma_name:string,atomb_name:string,bondtype:BOND_TYPE){
 
-        let atoma: Atom;
-        let atomb: Atom;
+        let atoma: number;
+        let atomb: number;
 
-        atoma = this.getAtom(this.atomIndexOf(atoma_name))
-        atomb = this.getAtom(this.atomIndexOf(atomb_name))
+        atoma = this.atomIndexOf(atoma_name)
+        atomb = this.atomIndexOf(atomb_name)
 
         this.bond_atoms.push([atoma,atomb]);
         this.bond_types.push(bondtype);
@@ -166,7 +190,7 @@ class System{
         return this.names.indexOf(name);
     }
 
-    * getAtoms(){
+    *getAtoms(){
         let natoms = this.natoms;
         for(let i = 0;i < natoms;i++){
             let c_atom = new Atom(
@@ -183,8 +207,8 @@ class System{
         let nbond = this.nbond;
         for(let i = 0;i < nbond;i++){
             yield new Bond(
-                this.bond_atoms[i][0],
-                this.bond_atoms[i][1],
+                this.getAtom(this.bond_atoms[i][0]),
+                this.getAtom(this.bond_atoms[i][1]),
                 this.bond_types[i],
             )
         }

@@ -5,6 +5,9 @@ import { StaticDrawUsage } from "three";
 import {System} from "./system"
 import { isUndefined } from "util";
 
+import {spawn, Thread, Worker} from 'threads'
+
+
 class Application{
     
     private system: System | null = null;
@@ -34,14 +37,16 @@ class Application{
     _openfile(e: Event){
         let target = e.target as HTMLInputElement;
         let files = target.files as FileList;
-        //let file = files?.item(0) as File;
 
         let parser = new AtomicsParsers();
         if(parser.try_parse(files) == tryParseResult.SUCCESS){
+            this.setState("File Load")
             parser.parse(files).then((system)=>{
+                this.setState("Drow System")
                 this.system = system;
                 return this.renderer.setSystem(system);
             }).then(()=>{
+                this.setState("Drow Finish")
                 target.value = "";
 
             })
@@ -69,6 +74,12 @@ class Application{
         if(!isUndefined(result)){
             propaties.appendChild(document.createTextNode(event.select));
         }
+    }
+
+    setState(value: string){
+        let state = document.getElementById("state");
+        state?.childNodes.forEach((values)=>{values.remove()});
+        state?.appendChild(document.createTextNode(value));
     }
 }
 

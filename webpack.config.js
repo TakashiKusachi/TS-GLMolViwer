@@ -1,5 +1,6 @@
 
 
+const ThreadsPlugin = require('threads-plugin');
 
 module.exports = {
     // モード値を production に設定すると最適化された状態で、
@@ -11,7 +12,7 @@ module.exports = {
     // ファイルの出力設定
     output: {
       //  出力ファイルのディレクトリ名
-      path: `${__dirname}/app/build`,
+      path: `${__dirname}/app`,
       // 出力ファイル名
       filename: "main.js"
     },
@@ -19,11 +20,11 @@ module.exports = {
       rules: [
         {
           // 拡張子 .ts の場合
-          test: /\.ts$/,
+          test: /\.tsx?$/,
           // TypeScript をコンパイルする
           use:[{
             loader: 'ts-loader',
-          }]
+          }],
         },
         {
           test:/\.css$/,
@@ -31,7 +32,7 @@ module.exports = {
             'style-loader',
             'css-loader',
           ]
-        }
+        },
       ]
     },
     // import 文で .ts ファイルを解決するため
@@ -39,6 +40,12 @@ module.exports = {
       extensions: [".ts", ".js"],
     },
     plugins: [
+      new ThreadsPlugin({
+        
+      }),
         //new CopyPlugin([{ from: './build' }])
-    ]
+    ],
+    externals:{
+      "tiny-worker": "tiny-worker",
+    }
   };
