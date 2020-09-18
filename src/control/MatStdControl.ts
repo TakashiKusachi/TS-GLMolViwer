@@ -5,10 +5,18 @@ import {Quaternion} from 'three'
 import {Control} from './control';
 
 type AnyCamera = PerspectiveCamera | OrthographicCamera;
+type AnyCanvas = HTMLCanvasElement | OffscreenCanvas;
+
+export type DMouseEvent = {
+    clientX:number,clientY:number,button:number,
+} | MouseEvent
+export type DWheelEvent ={
+        deltaY:number
+}|WheelEvent;
 
 /**某visualizerの動きを模倣したcameraコントローラ */
 class MatStdControl implements Control{
-    private canvas: HTMLElement;
+    private canvas: AnyCanvas;
     private camera: AnyCamera;
 
     private _leftbtn: boolean = false;
@@ -34,7 +42,7 @@ class MatStdControl implements Control{
      * @param camera コントロールされるカメラのオブジェクト
      * @param canvas webGLがレンダリングしている<canvas>のエレメント
      */
-    constructor(camera: AnyCamera, canvas: HTMLElement){
+    constructor(camera: AnyCamera, canvas: AnyCanvas){
         this.canvas = canvas;
         this.camera = camera;
 
@@ -49,18 +57,19 @@ class MatStdControl implements Control{
 
         this.maxZoom = 40;
         this.minZoom = -40;
-
+        /*
         this.canvas.addEventListener('mousemove',(e)=>{this.mousemove(e);});
         this.canvas.addEventListener('mouseup',(e)=>{this.mouseUp(e);});
         this.canvas.addEventListener('mousedown',(e)=>{this.mouseDown(e);});
         this.canvas.addEventListener('wheel',(e)=>{this.wheel(e);});
+        */
     }
 
     /**
      * mousemoveイベントの処理ハンドラ。
      * @param event mousemoveのイベント
      */
-    mousemove(event: MouseEvent){
+    mousemove(event: DMouseEvent){
         /**
          * 右ボタンドラッグによるオブジェクトの回転操作 
          * 厳密には、カメラがlookAtを中心に回転している。
@@ -116,7 +125,7 @@ class MatStdControl implements Control{
         }
     }
 
-    mouseDown(event: MouseEvent){
+    mouseDown(event: DMouseEvent){
         switch(event.button){
             case 0:
                 this._leftbtn = true;break;
@@ -128,7 +137,7 @@ class MatStdControl implements Control{
         this.setInfo(event);
     }
 
-    mouseUp(event: MouseEvent){
+    mouseUp(event: DMouseEvent){
         switch(event.button){
             case 0:
                 this._leftbtn = false;break;
@@ -140,7 +149,7 @@ class MatStdControl implements Control{
 
     }
 
-    wheel(event: WheelEvent){
+    wheel(event: DWheelEvent){
         let delta = event.deltaY / this.zoomScale;
         this.zoom = Math.min(Math.max(this.zoom + delta,this.minZoom),this.maxZoom);
 
@@ -175,7 +184,7 @@ class MatStdControl implements Control{
         this.camera.position.set(this.position.x,this.position.y,this.position.z);
     }
 
-    setInfo(e: MouseEvent){
+    setInfo(e: DMouseEvent){
         this.mouseposition = new Vector2(e.clientX,e.clientY);
         this.startCameraPosition = this.camera.position.clone();
         this.startUpVector = this.camera.up.clone();

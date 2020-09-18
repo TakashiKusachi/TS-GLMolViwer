@@ -1,4 +1,5 @@
-import {AtomicRender,SelectedEvent} from "./render"
+import {IAtomicRender,SelectedEvent} from "./Render"
+import {OnAtomicRender,WorkerAtomicRender} from "./Render/renderInter"
 import {AtomicsParsers,tryParseResult} from "./parser/parser"
 import * as parser from "./parser/car_parser"
 import { StaticDrawUsage } from "three";
@@ -11,14 +12,18 @@ import {spawn, Thread, Worker} from 'threads'
 class Application{
     
     private system: System | null = null;
-    private renderer: AtomicRender;
+    private renderer: IAtomicRender;
 
     constructor(){
-        this.renderer = new AtomicRender("#gl_canvas");
+        //let canvas = document.getElementById("gl_canvas") as HTMLCanvasElement;
+        const canvas = document.querySelector("#gl_canvas") as HTMLCanvasElement ;
+        this.renderer = new WorkerAtomicRender(canvas);
     }
 
     initialize(): void{
-        this.setEvent();
+        this.renderer.init().then(()=>{
+            this.setEvent();
+        })
     }
 
     setEvent(): void {
@@ -38,6 +43,8 @@ class Application{
         let target = e.target as HTMLInputElement;
         let files = target.files as FileList;
 
+        this.onLoad()
+
         let parser = new AtomicsParsers();
         if(parser.try_parse(files) == tryParseResult.SUCCESS){
             this.setState("File Load")
@@ -47,6 +54,7 @@ class Application{
                 return this.renderer.setSystem(system);
             }).then(()=>{
                 this.setState("Drow Finish")
+                this.offLoad();
                 target.value = "";
 
             })
@@ -80,6 +88,20 @@ class Application{
         let state = document.getElementById("state");
         state?.childNodes.forEach((values)=>{values.remove()});
         state?.appendChild(document.createTextNode(value));
+    }
+
+    onLoad(){
+        let loaderbg = document.getElementById("loader-bg");
+        let loader = document.getElementById("loader");
+        loaderbg?.classList.remove("is-hide")
+        loader?.classList.remove("is-hide")
+    }
+
+    offLoad(){
+        let loaderbg = document.getElementById("loader-bg");
+        let loader = document.getElementById("loader");
+        loaderbg?.classList.add("is-hide")
+        loader?.classList.add("is-hide")
     }
 }
 

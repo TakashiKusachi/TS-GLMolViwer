@@ -26,20 +26,20 @@ export const GroupSerializer: Serializer<SerializedThreeGroup,Group>={
 export const GroupSerializerImplementation: SerializerImplementation<SerializedThreeGroup,Group | any> ={
     deserialize(message,defaultHandler){
         if(message.__type === "$$ThreeGroup"){
-            console.log("Group deserializer",message.state)
+            //console.log("Group deserializer",message.state)
             return GroupSerializer.deserialize(message);
         }else{
-            console.log("Other deserializer")
+            //console.log("Other deserializer")
             return defaultHandler(message);
         }
     },
     serialize(input,defaultHandler){
         if(input instanceof Group){
-            console.log("Group serializer")
+            //console.log("Group serializer")
             return GroupSerializer.serialize(input);
         }else{
-            console.log("other serializer")
+            //console.log("other serializer")
             return defaultHandler(input);
         }
-    }
+    },
 }

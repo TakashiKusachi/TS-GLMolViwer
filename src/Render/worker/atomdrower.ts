@@ -1,13 +1,16 @@
 import { expose } from "threads/worker"
 import * as THREE from 'three'
-import { registerSerializer, DefaultSerializer } from "threads"
+import { registerSerializer} from "threads"
+import {Observable,Subject} from "threads/observable"
 
-import {System} from "../system"
+import {System} from "../../system"
 import {cube_,bond_radius,default_colors} from "../parameters"
 
-import {GroupSerializer,GroupSerializerImplementation} from "./serializer"
+import {GroupSerializer,GroupSerializerImplementation,SerializedThreeGroup} from "./serializer"
 
 registerSerializer(GroupSerializerImplementation)
+
+let subject = new Subject();
 
 function drowAtoms(_system: System,accPos: THREE.Vector3):THREE.Group{
     let system = new System(_system,false)
@@ -77,12 +80,32 @@ function drowBonds(_system:System,accPos: THREE.Vector3){
     return gbond;
 }
 
-expose (
-    (system)=>{
+function workerThread(system:System):SerializedThreeGroup|THREE.Group{
+    let total = new THREE.Group();
+    let accPos = new THREE.Vector3(0, 0, 0);
+    total.add(drowAtoms(system,accPos));
+    total.add(drowBonds(system,accPos));
+    return GroupSerializer.serialize(total);
+}
+
+function eventObserver(){
+    console.log("???")
+    return Observable.from(subject);
+}
+
+const worker ={
+    workerThread(system:System):SerializedThreeGroup|THREE.Group{
         let total = new THREE.Group();
         let accPos = new THREE.Vector3(0, 0, 0);
         total.add(drowAtoms(system,accPos));
         total.add(drowBonds(system,accPos));
         return GroupSerializer.serialize(total);
-    }
+    },
+    eventObserver,
+}
+
+export type Worker = typeof worker;
+
+expose (
+    worker
 )
