@@ -3,7 +3,8 @@ import * as THREE from 'three'
 import { registerSerializer} from "threads"
 import {Observable,Subject} from "threads/observable"
 
-import {System} from "../../system"
+import {AbstractSystem as System} from "../../system"
+import {deserializeSystem,AnySystem} from "../../parser/parser"
 import {cube_,bond_radius,default_colors} from "../parameters"
 
 import {GroupSerializer,GroupSerializerImplementation,SerializedThreeGroup} from "./serializer"
@@ -13,7 +14,8 @@ registerSerializer(GroupSerializerImplementation)
 let subject = new Subject();
 
 function drowAtoms(_system: System,accPos: THREE.Vector3):THREE.Group{
-    let system = new System(_system,false)
+    //let system = new System(_system,false)
+    let system = _system;
     let center = accPos;
 
     let gatomics = new THREE.Group();
@@ -49,7 +51,8 @@ function drowAtoms(_system: System,accPos: THREE.Vector3):THREE.Group{
 }
 
 function drowBonds(_system:System,accPos: THREE.Vector3){
-    let system = new System(_system,false);
+    //let system = new System(_system,false)
+    let system = _system;
     let gbond = new THREE.Group();
     let center = accPos;
     let iter_bond = system.getBond();
@@ -80,23 +83,16 @@ function drowBonds(_system:System,accPos: THREE.Vector3){
     return gbond;
 }
 
-function workerThread(system:System):SerializedThreeGroup|THREE.Group{
-    let total = new THREE.Group();
-    let accPos = new THREE.Vector3(0, 0, 0);
-    total.add(drowAtoms(system,accPos));
-    total.add(drowBonds(system,accPos));
-    return GroupSerializer.serialize(total);
-}
-
 function eventObserver(){
     console.log("???")
     return Observable.from(subject);
 }
 
 const worker ={
-    workerThread(system:System):SerializedThreeGroup|THREE.Group{
+    workerThread(_system:AnySystem):SerializedThreeGroup|THREE.Group{
         let total = new THREE.Group();
         let accPos = new THREE.Vector3(0, 0, 0);
+        let system = deserializeSystem(_system);
         total.add(drowAtoms(system,accPos));
         total.add(drowBonds(system,accPos));
         return GroupSerializer.serialize(total);
