@@ -3,7 +3,7 @@ import {OnAtomicRender,WorkerAtomicRender} from "./Render/renderInter"
 import {AtomicsParsers,tryParseResult} from "./parser/parser"
 import * as parser from "./parser/car_parser"
 import { StaticDrawUsage } from "three";
-import {AbstractSystem as System} from "./system"
+import {System} from "./systems"
 import { isUndefined } from "util";
 import {InvalidIdError} from "./errorHandler"
 
@@ -65,7 +65,13 @@ class Application{
                 this.offLoad();
                 target.value = "";
 
+            }).catch((reason)=>{
+
             })
+        }
+        else{
+            alert(`指定したファイルは対応外です。対応したファイルの入力してください。`);
+            this.offLoad();
         }
     }
 

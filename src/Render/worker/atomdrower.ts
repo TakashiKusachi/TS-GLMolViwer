@@ -3,8 +3,7 @@ import * as THREE from 'three'
 import { registerSerializer} from "threads"
 import {Observable,Subject} from "threads/observable"
 
-import {AbstractSystem as System} from "../../system"
-import {deserializeSystem,AnySystem} from "../../parser/parser"
+import {System} from "../../systems"
 import {cube_,bond_radius,default_colors} from "../parameters"
 
 import {GroupSerializer,GroupSerializerImplementation,SerializedThreeGroup} from "./serializer"
@@ -89,10 +88,10 @@ function eventObserver(){
 }
 
 const worker ={
-    workerThread(_system:AnySystem):SerializedThreeGroup|THREE.Group{
+    workerThread(_system:System):SerializedThreeGroup|THREE.Group{
         let total = new THREE.Group();
         let accPos = new THREE.Vector3(0, 0, 0);
-        let system = deserializeSystem(_system);
+        let system = System.getSystem(_system);
         total.add(drowAtoms(system,accPos));
         total.add(drowBonds(system,accPos));
         return GroupSerializer.serialize(total);

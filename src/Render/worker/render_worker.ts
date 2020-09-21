@@ -5,7 +5,7 @@ import {TransferDescriptor} from 'threads'
 import {AtomicRender,TickCallBack} from "../render"
 import {AnyCanvas,_OffscreenCanvas,SelectedEvent} from "../"
 import {DMouseEvent,DWheelEvent} from "../../control/MatStdControl"
-import { AbstractSystem as System } from '../../system';
+import { System } from '../../systems';
 import { observable } from "vue/types/umd"
 
 let obj: AtomicRender|undefined;

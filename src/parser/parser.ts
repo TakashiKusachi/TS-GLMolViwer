@@ -1,6 +1,6 @@
-import {AbstractSystem as System} from "../system"
-import { isNull } from "util";
-import {CarParser,System as CarSystem} from "./car_parser"
+
+import {System} from "../systems"
+import {CarParser} from "./car_parser"
 import {match,getExtension} from './utils'
 
 export interface iParser{
@@ -31,7 +31,7 @@ export class AtomicsParsers{
         }
 
         let parser = this.search(files);
-        if(!isNull(parser)){
+        if(parser !== null){
             return tryParseResult.SUCCESS
         }
         return tryParseResult.FAILURE;
@@ -69,14 +69,3 @@ export class AtomicsParsers{
         }
     }
 }
-
-export function deserializeSystem(system:AnySystem):System{
-    switch (system.systemName){
-        case "car":
-            return CarSystem.getSystem(system );
-        default:
-            throw Error("");
-    }
-}
-
-export type AnySystem = CarSystem;

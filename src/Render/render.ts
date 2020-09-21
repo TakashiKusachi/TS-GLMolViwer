@@ -5,8 +5,7 @@ import Stats from 'three/examples/jsm/libs/stats.module';
 import {Worker,spawn,Thread,ModuleThread,Transfer} from 'threads'
 import { registerSerializer } from "threads"
 
-import {AnySystem} from "../parser/parser"
-import { AbstractSystem as System } from '../system';
+import {System} from "../systems"
 import {cube_,bond_radius,default_colors} from "./parameters"
 import {MatStdControl} from "../control/MatStdControl"
 
@@ -210,7 +209,7 @@ export class AtomicRender extends Render{
     }
 
     async drowSystem2Scene(){
-        let system = this.system as AnySystem;
+        let system = this.system as System;
         let accPos = new THREE.Vector3(0,0,0);
 
         

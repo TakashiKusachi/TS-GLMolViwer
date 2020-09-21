@@ -1,5 +1,5 @@
 
-import { AbstractSystem as System } from '../system';
+import { System } from '../systems';
 import { Object3D } from 'three';
 
 type Style={

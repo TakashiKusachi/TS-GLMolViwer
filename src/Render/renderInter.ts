@@ -3,7 +3,7 @@ import { Object3D, Vector3, Raycaster, Vector2, GridHelper, Group } from 'three'
 import {Worker,spawn,Thread,ModuleThread,Transfer} from 'threads'
 import Stats from 'three/examples/jsm/libs/stats.module';
 
-import { AbstractSystem as System } from '../system';
+import { System } from '../systems';
 import {RenderWorker} from "./worker/render_worker"
 import {AnyCanvas,SelectedEvent,IAtomicRender,_OffscreenCanvas} from "."
 import {NotSupportOffscreenCanvas} from "./errorHandler"
