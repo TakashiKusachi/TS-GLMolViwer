@@ -1,5 +1,5 @@
-import {System,ElemType,Position,elemStr2Type} from "../system"
-import { isNull } from "util";
+
+import {System} from "../systems"
 import {CarParser} from "./car_parser"
 import {match,getExtension} from './utils'
 
@@ -31,7 +31,7 @@ export class AtomicsParsers{
         }
 
         let parser = this.search(files);
-        if(!isNull(parser)){
+        if(parser !== null){
             return tryParseResult.SUCCESS
         }
         return tryParseResult.FAILURE;

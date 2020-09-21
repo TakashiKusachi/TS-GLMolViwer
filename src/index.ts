@@ -3,8 +3,9 @@ import {OnAtomicRender,WorkerAtomicRender} from "./Render/renderInter"
 import {AtomicsParsers,tryParseResult} from "./parser/parser"
 import * as parser from "./parser/car_parser"
 import { StaticDrawUsage } from "three";
-import {System} from "./system"
+import {System} from "./systems"
 import { isUndefined } from "util";
+import {InvalidIdError} from "./errorHandler"
 
 import {spawn, Thread, Worker} from 'threads'
 
@@ -14,15 +15,22 @@ class Application{
     private system: System | null = null;
     private renderer: IAtomicRender;
 
-    constructor(){
-        //let canvas = document.getElementById("gl_canvas") as HTMLCanvasElement;
-        const canvas = document.querySelector("#gl_canvas") as HTMLCanvasElement ;
-        this.renderer = new WorkerAtomicRender(canvas);
+    constructor(id:string){
+        this.onLoad()
+        try{
+            const canvas = document.querySelector(id) as HTMLCanvasElement ;
+            if (canvas === null) throw new InvalidIdError(`${id}が存在しません。`);
+            this.renderer = new WorkerAtomicRender(canvas);
+        }catch(e){
+            alert("エラーが発生しました。")
+            throw e;
+        }
     }
 
     initialize(): void{
         this.renderer.init().then(()=>{
             this.setEvent();
+            this.offLoad();
         })
     }
 
@@ -57,7 +65,13 @@ class Application{
                 this.offLoad();
                 target.value = "";
 
+            }).catch((reason)=>{
+
             })
+        }
+        else{
+            alert(`指定したファイルは対応外です。対応したファイルの入力してください。`);
+            this.offLoad();
         }
     }
 
@@ -77,11 +91,9 @@ class Application{
 
     _selectAtomEvent(event:SelectedEvent){
         let propaties = document.getElementById("control-area") as HTMLElement;
-
-        let result = this.system?.getNames().findIndex((val)=>val===event.select);
-        if(!isUndefined(result)){
-            propaties.appendChild(document.createTextNode(event.select));
-        }
+        let system = this.system as System;
+        let i = system.atomIndexOf(event.select)
+        let atom = system.getAtom(i)
     }
 
     setState(value: string){
@@ -105,5 +117,5 @@ class Application{
     }
 }
 
-let app = new Application();
+let app = new Application("#gl_canvas");
 window.onload = ()=>{app.initialize();};

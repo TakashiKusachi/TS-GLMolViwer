@@ -5,7 +5,7 @@ import Stats from 'three/examples/jsm/libs/stats.module';
 import {Worker,spawn,Thread,ModuleThread,Transfer} from 'threads'
 import { registerSerializer } from "threads"
 
-import { System,Position,ElemType,Atom } from '../system';
+import {System} from "../systems"
 import {cube_,bond_radius,default_colors} from "./parameters"
 import {MatStdControl} from "../control/MatStdControl"
 
@@ -196,6 +196,7 @@ export class AtomicRender extends Render{
 
     }
     async setSystem(system: System){
+        console.log("WorkerSet",system);
         this.stop();
         this.clearScene();
         this.system = system;
@@ -239,7 +240,7 @@ export class AtomicRender extends Render{
      * @param accPos 
      */
     drowAtoms(_system: System,accPos: THREE.Vector3):THREE.Group{
-        let system = new System(_system,false)
+        let system = _system
         let center = accPos;
     
         let gatomics = new THREE.Group();
@@ -275,7 +276,7 @@ export class AtomicRender extends Render{
     }
     
     drowBonds(_system:System,accPos: THREE.Vector3){
-        let system = new System(_system,false);
+        let system = _system;
         let gbond = new THREE.Group();
         let center = accPos;
         let iter_bond = system.getBond();

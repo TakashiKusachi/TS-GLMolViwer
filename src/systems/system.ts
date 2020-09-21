@@ -1,11 +1,14 @@
-import { stringify } from "querystring";
-import { DH_NOT_SUITABLE_GENERATOR } from "constants";
-import { PositionalAudio } from "three";
-import { isNull } from "util";
 
 enum ElemType{
     ANY,H,He,Li,Be,B,C,N,O,F,Ne,
 }
+
+export enum BondType{
+    Single,
+    Double,
+    Triple,
+}
+
 const elemStr=[
     "","H","He","Li","Be","B","C","N","O","F","Ne",
 ]
@@ -14,45 +17,76 @@ function elemStr2Type(name: string): ElemType{
     return <ElemType>index;
 }
 
-type Position = Array<number>;
-type Name = string;
+export type Position = Array<number>;
+export type Name = string;
 
-/**
- * 
- */
-class Atom{
-    private _name: Name;
+export interface IAtom{
+    position: Position;
+    name: Name;
+    element: ElemType;
+    index: number;
+}
+
+export type AtomConstructorArgument={
+    name: Name,
+    index: number,
+    element?: ElemType,
+    position?: Position,
+}
+
+export class Atom implements IAtom{
     private _position: Position;
+    private _name : Name;
     private _element: ElemType;
     private _index: number;
 
-    constructor(name:string,position:Position,element:ElemType,index: number){
-        this._name = name;
-        this._position = position;
-        this._element = element;
-        this._index = index;
+    constructor(
+        {
+            name,
+            index,
+            element = ElemType.ANY,
+            position = [0,0,0],
+        }:AtomConstructorArgument
+    ){
+            this._position = position;
+            this._name = name;
+            this._element = element;
+            this._index = index;
     }
 
     get position(){
         return this._position;
     }
+
     get name(){
         return this._name;
     }
+
     get element(){
         return this._element;
     }
     get index(){
         return this._index;
     }
+
 }
 
-type BOND_TYPE= number;
-class Bond{
+export interface IBond<AtomType extends IAtom = IAtom>{
+    atoma: AtomType;
+    atomb: AtomType;
+
+    vector: number[];
+    distance: number;
+
+    position: Position; 
+}
+
+
+class Bond implements IBond<Atom>{
     private _atoma: Atom;
     private _atomb: Atom;
-    private _bond_type: BOND_TYPE;
-    constructor(atoma:Atom,atomb:Atom,bond_type:BOND_TYPE){
+    private _bond_type: BondType;
+    constructor(atoma:Atom,atomb:Atom,bond_type:BondType){
         this._atoma = atoma;
         this._atomb = atomb;
         this._bond_type = bond_type;
@@ -93,19 +127,35 @@ class Bond{
     }
 }
 
+export interface ISystem<AtomType extends IAtom,BondType extends IBond<AtomType>>{
+    /**getterでの実装を禁ズ */
+    systemName: string;
+
+    natoms: number;
+    nbond: number;
+    getNames(): string[];
+    getPositions(): Position[];
+    getElements(): ElemType[];
+    getAtom(index:number): AtomType;
+    atomIndexOf(name:string): number;
+    getAtoms():Generator<AtomType,string,unknown>;
+    getBond():Generator<BondType,void,unknown>;
+}
+
 
 /**
  * 系のコンテナクラス
  */
-class System{
+export class System implements ISystem<Atom,Bond>{
+    public systemName:string = "car"
     private N_undef_atoms: number = 0;
 
     private names: Array<Name> = [];
-    private positions: Array<Position> = [];
+    private positions: Position[] = [];
     private elements: Array<ElemType> = [];
     
     private bond_atoms: Array<Array<number>> = [];
-    private bond_types: Array<BOND_TYPE> = [];
+    private bond_types: Array<BondType> = [];
 
     /**
      * 
@@ -114,23 +164,25 @@ class System{
      * 
      * @Notes need_copyしても、positionとかbond_atomsのような多重配列の場合、二次参照先は同じオブジェクトを参照するため、注意が必要です。
      */
-    constructor(ord_system:System|null = null,need_copy=true){
-        if(isNull(ord_system))return;
+    static getSystem(ord_system: System,need_copy=true){
+        let ret = new System();
+        if(ord_system === null)throw Error("");
         if(need_copy){
-            this.N_undef_atoms = ord_system.N_undef_atoms;
-            this.names = ord_system.names.concat();
-            this.positions = ord_system.positions.concat();
-            this.elements = ord_system.elements.concat();
-            this.bond_atoms = ord_system.bond_atoms.concat();
-            this.bond_types = ord_system.bond_types.concat();
+            ret.N_undef_atoms = ord_system.N_undef_atoms;
+            ret.names = ord_system.names.concat();
+            ret.positions = ord_system.positions.concat();
+            ret.elements = ord_system.elements.concat();
+            ret.bond_atoms = ord_system.bond_atoms.concat();
+            ret.bond_types = ord_system.bond_types.concat();
         }else{
-            this.N_undef_atoms = ord_system.N_undef_atoms;
-            this.names = ord_system.names;
-            this.positions = ord_system.positions;
-            this.elements = ord_system.elements;
-            this.bond_atoms = ord_system.bond_atoms;
-            this.bond_types = ord_system.bond_types;
+            ret.N_undef_atoms = ord_system.N_undef_atoms;
+            ret.names = ord_system.names;
+            ret.positions = ord_system.positions;
+            ret.elements = ord_system.elements;
+            ret.bond_atoms = ord_system.bond_atoms;
+            ret.bond_types = ord_system.bond_types;
         }
+        return ret;
     }
 
     add_atom(name: Name|null, position:Position, element:ElemType){
@@ -148,7 +200,7 @@ class System{
         this.elements.push(element);
     }
 
-    add_bond(atoma_name:string,atomb_name:string,bondtype:BOND_TYPE){
+    add_bond(atoma_name:string,atomb_name:string,bondtype:BondType){
 
         let atoma: number;
         let atomb: number;
@@ -178,12 +230,12 @@ class System{
         return this.elements;
     }
     getAtom(index: number){
-        return new Atom(
-            this.names[index],
-            this.positions[index],
-            this.elements[index],
-            index,
-        )
+        return new Atom({
+            name: this.names[index],
+            index: index,
+            element: this.elements[index],
+            position: this.positions[index],
+        })
     }
 
     atomIndexOf(name: string):number{
@@ -193,12 +245,12 @@ class System{
     *getAtoms(){
         let natoms = this.natoms;
         for(let i = 0;i < natoms;i++){
-            let c_atom = new Atom(
-                this.names[i],
-                this.positions[i],
-                this.elements[i],
-                i,
-            )
+            let c_atom = new Atom({
+                name: this.names[i],
+                index: i,
+                element: this.elements[i],
+                position: this.positions[i],
+            })
             yield c_atom;
         }
         return "Done";
@@ -215,5 +267,5 @@ class System{
     }
 }
 
-export {ElemType,Position,Atom,System};
+export {ElemType};
 export {elemStr2Type,elemStr}

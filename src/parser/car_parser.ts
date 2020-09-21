@@ -1,8 +1,9 @@
 
-import {System,ElemType,Position,elemStr2Type} from "../system"
+
+import {elemStr2Type,} from "../systems/system"
+import {System} from "../systems"
 import {iParser} from "./parser"
 import {searchFile} from './utils'
-import { isFunction, isUndefined } from "util";
 
 export class CarParser implements iParser{
     constructor(){

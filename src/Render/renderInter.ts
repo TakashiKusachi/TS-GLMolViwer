@@ -3,12 +3,12 @@ import { Object3D, Vector3, Raycaster, Vector2, GridHelper, Group } from 'three'
 import {Worker,spawn,Thread,ModuleThread,Transfer} from 'threads'
 import Stats from 'three/examples/jsm/libs/stats.module';
 
-import { System } from '../system';
+import { System } from '../systems';
 import {RenderWorker} from "./worker/render_worker"
 import {AnyCanvas,SelectedEvent,IAtomicRender,_OffscreenCanvas} from "."
+import {NotSupportOffscreenCanvas} from "./errorHandler"
 import {AtomicRender,TickCallBack} from "./render"
 import { DMouseEvent,DWheelEvent } from '../control/MatStdControl';
-import { resolve } from 'path';
 import { Observable } from 'threads/observable';
 
 
@@ -108,7 +108,10 @@ export class WorkerAtomicRender extends CanvasEventHandler implements IAtomicRen
     async init(){
         console.log("init")
         this.worker = await spawn<RenderWorker>(new Worker("./worker/render_worker.ts"));
+
+        if(this.canvas.transferControlToOffscreen === undefined)throw new NotSupportOffscreenCanvas(`${this.canvas.id}はoffscreencanvasに対応していません。`)
         let canvas = this.canvas.transferControlToOffscreen() as _OffscreenCanvas;
+        
         canvas.style = {height:this.canvas.height,width:this.canvas.width}
         await this.worker.init(Transfer(canvas),this.canvas.height,this.canvas.width).finally();
         this.f_resize(this.canvas);
@@ -117,7 +120,7 @@ export class WorkerAtomicRender extends CanvasEventHandler implements IAtomicRen
     }
 
     async setSystem(system: System){
-        console.log("setSystem")
+        console.log("setSystem",system)
         return this.worker?.setSystem(system).finally();
     }
 
