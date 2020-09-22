@@ -23,6 +23,9 @@ const render_worker = {
     setSystem,
     clearScene,
     resize,
+    isRun,
+    start,
+    stop,
 
 
     __setSelectEventObserber,
@@ -59,6 +62,21 @@ function clearScene(){
 function resize(height: number,width: number){
     let render = obj_check();
     render.resize(height,width);
+}
+
+function isRun(){
+    let render = obj_check();
+    return render.isRun;
+}
+
+function start(){
+    let render = obj_check();
+    render.start();
+}
+
+function stop(){
+    let render = obj_check();
+    render.stop();
 }
 
 function click(mouse_x:number,mouse_y:number){

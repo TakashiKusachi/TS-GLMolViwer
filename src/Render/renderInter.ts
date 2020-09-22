@@ -10,6 +10,7 @@ import {NotSupportOffscreenCanvas} from "./errorHandler"
 import {AtomicRender,TickCallBack} from "./render"
 import { DMouseEvent,DWheelEvent } from '../control/MatStdControl';
 import { Observable } from 'threads/observable';
+import { resolve } from 'path';
 
 
 abstract class CanvasEventHandler{
@@ -119,6 +120,21 @@ export class WorkerAtomicRender extends CanvasEventHandler implements IAtomicRen
         await this.__setTickCallBack();
     }
 
+    get isRun(){
+        if(this.worker === null)throw new Error("Not initialize of render")
+        return this.worker.isRun();
+    }
+
+    start(){
+        if(this.worker === null)throw new Error("Not initialize of render")
+        return this.worker.start();
+    }
+    
+    stop(){
+        if(this.worker === null)throw new Error("Not initialize of render")
+        return this.worker.stop();
+    }
+
     async setSystem(system: System){
         console.log("setSystem",system)
         return this.worker?.setSystem(system).finally();
@@ -199,6 +215,23 @@ export class OnAtomicRender extends CanvasEventHandler implements IAtomicRender{
         this.render = new AtomicRender(this.canvas);
         this.f_resize(this.canvas);
         this.render.setTickCallBack((sec)=>this.tick(sec));
+    }
+
+    get isRun(){
+        return new Promise<boolean>((resolve)=>{
+            if(this.render === undefined)throw new Error("Not initialize of render")
+            resolve(this.render.isRun);
+        })
+    }
+
+    async start(){
+        if(this.render === undefined)throw new Error("Not initialize of render")
+        this.render.start();
+    }
+    
+    async stop(){
+        if(this.render === undefined)throw new Error("Not initialize of render")
+        this.render.stop();
     }
 
     async setSystem(system:System){

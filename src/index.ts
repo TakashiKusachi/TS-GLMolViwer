@@ -1,14 +1,97 @@
 import {IAtomicRender,SelectedEvent} from "./Render"
-import {OnAtomicRender,WorkerAtomicRender} from "./Render/renderInter"
+import {OnAtomicRender,WorkerAtomicRender} from "./Render"
 import {AtomicsParsers,tryParseResult} from "./parser/parser"
-import * as parser from "./parser/car_parser"
-import { StaticDrawUsage } from "three";
 import {System} from "./systems"
-import { isUndefined } from "util";
 import {InvalidIdError} from "./errorHandler"
 
-import {spawn, Thread, Worker} from 'threads'
+//import Vue from "vue"
+import Component from "vue-class-component";
+import {Vue,Prop} from "vue-property-decorator";
+import NewAtomForm from './vue_components/addAtom.vue'
+import LoaderView from "./vue_components/loaderView.vue"
+import HeaderMenu from "./vue_components/header.vue"
 
+@Component({
+    el: "#vueapp",
+    components:{
+        NewAtomForm,
+        LoaderView,
+        HeaderMenu,
+    }
+})
+class VueApp extends Vue{
+
+    private system: System | null = null;
+    private renderer: IAtomicRender|undefined;
+
+    private newAtomEnable = false;
+    private loaderEnable = false;
+
+    mounted(){
+        this.showLoaderView();
+        try{
+            const canvas = document.querySelector("#gl_canvas") as HTMLCanvasElement ;
+            if (canvas === null) throw new InvalidIdError(`#gl_canvasが存在しません。`);
+            this.renderer = new WorkerAtomicRender(canvas);
+        }catch(e){
+            alert("エラーが発生しました。");
+            throw e;
+        }
+        this.renderer.init().then(()=>{
+            this.hideLoaderView();
+        })
+    }
+
+    New(){
+        if(this.renderer === undefined)return;
+        this.renderer.clearScene();
+        this.system = null;
+    }
+
+    openFile(files:FileList){
+        this.showLoaderView();
+        if(this.renderer === undefined)return;
+
+        let parser = new AtomicsParsers();
+        if(parser.try_parse(files) == tryParseResult.SUCCESS){
+            //this.setState("File Load")
+            parser.parse(files).then((system)=>{
+                //this.setState("Drow System")
+                this.system = system;
+                return this.renderer?.setSystem(system);
+            }).then(()=>{
+                //this.setState("Drow Finish")
+                this.hideLoaderView();
+
+            }).catch((reason)=>{
+
+            })
+        }
+        else{
+            alert(`指定したファイルは対応外です。対応したファイルの入力してください。`);
+            this.hideLoaderView();
+        }
+    }
+
+    showLoaderView(){
+        this.loaderEnable = true;
+    }
+    hideLoaderView(){
+        this.loaderEnable = false;
+    }
+
+    showNewAtomForm(){
+        this.newAtomEnable = true;
+    }
+    newAtomSubmit(){
+        this.newAtomEnable = false;
+    }
+    newAtomCancel(){
+        this.newAtomEnable = false;
+    }
+}
+
+let vueapp = new VueApp();
 
 class Application{
     
@@ -22,7 +105,7 @@ class Application{
             if (canvas === null) throw new InvalidIdError(`${id}が存在しません。`);
             this.renderer = new WorkerAtomicRender(canvas);
         }catch(e){
-            alert("エラーが発生しました。")
+            alert("エラーが発生しました。");
             throw e;
         }
     }
@@ -31,20 +114,24 @@ class Application{
         this.renderer.init().then(()=>{
             this.setEvent();
             this.offLoad();
+        }).catch((reason)=>{
+
         })
     }
 
     setEvent(): void {
         this.openfileEvent();
         this.newEvent();
+        this.newAtomEvent();
         this.selectAtomEvent();
     }
 
     openfileEvent(){
-        var openfile: HTMLElement;
+        let openfile: HTMLElement;
 
         openfile = document.getElementById("file") as HTMLElement;
-        openfile?.addEventListener('change',(e)=>{this._openfile(e)});
+        if(openfile === null)throw new InvalidIdError("fileが存在しません。");
+        openfile.addEventListener('change',(e)=>{this._openfile(e)});
     }
 
     _openfile(e: Event){
@@ -76,13 +163,23 @@ class Application{
     }
 
     newEvent(){
-        var newbutton = document.getElementById("new") as HTMLElement;
+        let newbutton = document.getElementById("new") as HTMLElement;
+        if(newbutton === null) throw new InvalidIdError("newが存在しません。");
         newbutton.addEventListener("click",(e)=>{this._newEvent();});
     }
 
     _newEvent(){
         this.renderer.clearScene();
         this.system = null;
+    }
+
+    newAtomEvent(){
+        let newbutton = document.getElementById("newAtom") as HTMLElement;
+        if(newbutton === null) throw new InvalidIdError("newAtomが存在しません。");
+
+        newbutton.addEventListener("click",(e)=>{
+            vueapp.showNewAtomForm();
+        })
     }
 
     selectAtomEvent(){
@@ -98,24 +195,20 @@ class Application{
 
     setState(value: string){
         let state = document.getElementById("state");
-        state?.childNodes.forEach((values)=>{values.remove()});
-        state?.appendChild(document.createTextNode(value));
+        if(state === null)throw new InvalidIdError("stateが存在しません。");
+        state.childNodes.forEach((values)=>{values.remove()});
+        state.appendChild(document.createTextNode(value));
     }
 
     onLoad(){
-        let loaderbg = document.getElementById("loader-bg");
-        let loader = document.getElementById("loader");
-        loaderbg?.classList.remove("is-hide")
-        loader?.classList.remove("is-hide")
+        vueapp.showLoaderView()
     }
 
     offLoad(){
-        let loaderbg = document.getElementById("loader-bg");
-        let loader = document.getElementById("loader");
-        loaderbg?.classList.add("is-hide")
-        loader?.classList.add("is-hide")
+        vueapp.hideLoaderView();
     }
 }
 
-let app = new Application("#gl_canvas");
-window.onload = ()=>{app.initialize();};
+
+//let app = new Application("#gl_canvas");
+//window.onload = ()=>{app.initialize();};
