@@ -5,39 +5,22 @@
         <link rel="stylesheet" href="style/main.css">
     </head>
     <body>
-        <div id="loader-bg" class="is-hide">
-            <div id="loader" class="is-hide">
-                <p>NowLoading</p>
-            </div>
-        </div>
-        <header id="header-contents">
-            <ul class="header_single">
-                <li>
-                    File
-                    <ul> 
-                        <li><label>New<input id="new" type="button"></label></li>
-                        <li><label>OpenFile<input id="file" type="file" multiple></label></li>
-                    </ul>
-                </li>
-                <li>
-                    Viewer
-                    <ul>
-                        <li><label>BackGraund<input id="back" type="color"></label></li>
-                    </ul>
-                </li>
-            </ul>
-        </header>
+        <div id="vueapp">
+            <loader-view :enable="loaderEnable"></loader-view>
+            <new-atom-form :enable="newAtomEnable" @submit="newAtomSubmit" @cancel="newAtomCancel"></new-atom-form>
+            <header-menu @new-system="New" @open-file="openFile" @new-atom="showNewAtomForm"></header-menu>
 
-        <div id="main-contents">
-            <div class="content" id="view-area">
-                <canvas id="gl_canvas"></canvas>
+            <div id="main-contents">
+                <div class="content" id="view-area">
+                    <canvas id="gl_canvas"></canvas>
+                </div>
+                <div class="content" id="control-area">
+                </div>
             </div>
-            <div class="content" id="control-area">
+            <div id="fotter-contents">
+                <div id="state"></div>
             </div>
         </div>
-        <div id="fotter-contents">
-            <div id="state"></div>
-        </div>
-        <script src="main.js" type="text/javascript"></script>
+        <script src="main.js" type="text/javascript"></script>        
     </body>
 </html>

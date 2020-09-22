@@ -1,5 +1,6 @@
 
 import { System } from '../systems';
+import {WorkerAtomicRender,OnAtomicRender} from "./renderInter"
 import { Object3D } from 'three';
 
 type Style={
@@ -20,7 +21,13 @@ export interface SelectedEvent{
 
 export interface IAtomicRender{
     init: ()=>Promise<void>;
+    isRun: Promise<boolean>;
+    start: ()=>Promise<void>;
+    stop: ()=>Promise<void>;
     setSystem: (system:System)=>Promise<void>;
+    //addAtom: (position:,element:,name:)=>Promise<void>;
     clearScene: ()=>Promise<void>;
     addSelectedEvent: (callbacl: (event:SelectedEvent)=>void)=>void;
 }
+
+export {WorkerAtomicRender,OnAtomicRender}

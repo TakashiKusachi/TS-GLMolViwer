@@ -1,6 +1,7 @@
 
 
 const ThreadsPlugin = require('threads-plugin');
+const VueLoaderPlugin = require('vue-loader/lib/plugin')
 
 module.exports = {
     // モード値を production に設定すると最適化された状態で、
@@ -22,9 +23,10 @@ module.exports = {
           // 拡張子 .ts の場合
           test: /\.tsx?$/,
           // TypeScript をコンパイルする
-          use:[{
-            loader: 'ts-loader',
-          }],
+          loader: 'ts-loader',
+          options:{
+            appendTsSuffixTo:[/\.vue$/],
+          }
         },
         {
           test:/\.css$/,
@@ -33,16 +35,26 @@ module.exports = {
             'css-loader',
           ]
         },
+        {
+          test:/\.vue$/,
+          loaders:[
+            'vue-loader'
+          ]
+        }
       ]
     },
     // import 文で .ts ファイルを解決するため
     resolve: {
-      extensions: [".ts", ".js"],
+      extensions: [".ts", ".js",'.vue'],
+      alias: {
+        vue$: "vue/dist/vue.esm.js"
+      },
     },
     plugins: [
       new ThreadsPlugin({
         
       }),
+      new VueLoaderPlugin(),
         //new CopyPlugin([{ from: './build' }])
     ],
     externals:{

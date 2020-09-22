@@ -10,10 +10,10 @@ import {cube_,bond_radius,default_colors} from "./parameters"
 import {MatStdControl} from "../control/MatStdControl"
 
 
-import {AnyCanvas,SelectedEvent} from "."
+import {AnyCanvas,SelectedEvent,IAtomicRender} from "."
 import {Worker as AtomWorker} from "./worker/atomdrower"
-import {RenderWorker} from "./worker/render_worker"
 import {GroupSerializerImplementation} from "./worker/serializer"
+import { resolve } from 'path';
 
 registerSerializer(GroupSerializerImplementation);
 
@@ -98,16 +98,18 @@ export abstract class Render{
         )
     }
 
-    stop(){
+    async stop(){
         this._isRun = false;
     }
 
-    start(){
+    async start(){
         this._isRun = true;
     }
 
     get isRun(){
-        return this._isRun;
+        return new Promise<boolean>((resolve)=>{
+            resolve(this._isRun)
+        })
     }
 
     get isTick(){
@@ -120,7 +122,7 @@ export abstract class Render{
         requestAnimationFrame(()=>{this.tick();});
         //this.stats.update();
         //this.tickCallBack();
-        this.tickCallBack({sec:sec,isRun:this.isRun});
+        this.tickCallBack({sec:sec,isRun:this._isRun});
         if(!this.isRun)return;
         this.control.update();
         this.lightSync();
@@ -178,7 +180,7 @@ export abstract class Render{
     }
 }
 
-export class AtomicRender extends Render{
+export class AtomicRender extends Render implements IAtomicRender{
     private system : System|null;
     
     private gatomics: THREE.Group | null;
@@ -195,6 +197,11 @@ export class AtomicRender extends Render{
         this.clearScene();
 
     }
+
+    async init(){
+
+    }
+
     async setSystem(system: System){
         console.log("WorkerSet",system);
         this.stop();
@@ -318,7 +325,7 @@ export class AtomicRender extends Render{
         return cen;
     }
     
-    clearScene(){
+    async clearScene(){
         super.clearScene();
         this.gatomics = null;
         this.gbond = null;
