@@ -210,6 +210,10 @@ export class AtomicRender extends Render implements IAtomicRender{
         let ret = new Promise<void>(async (resolve,reject)=>{
             await this.drowSystem2Scene();
             this.start();
+            let selected_atom = this.gatomics?.children[-1];
+            if (selected_atom !== undefined){
+                this.selected(selected_atom,selected_atom.name)
+            }
             resolve();
         });
         return ret;

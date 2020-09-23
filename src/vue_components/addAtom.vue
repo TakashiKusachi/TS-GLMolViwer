@@ -1,7 +1,10 @@
 <template>
     <div id="newAtomForm" :class="form_class">
         <form>
-            <input id="elemtype" type="text" list="elemtypes"> <br>
+            <input id="elemtype" type="text" list="elemtypes" v-model="element"> <br>
+            <datalist id="elemtypes">
+                <option v-for="elem in elemType" :key="elem" :value="elem"></option>
+            </datalist>
             <input id="newAtomSubmit" type="button" value="追加" @click="submit">
             <input id="newAtomCancel" type="button" value="キャンセル" @click="cancel">
         </form>
@@ -15,8 +18,8 @@
 }
 
 #newAtomForm{
-    width: 150px;
-    height: 50px;
+    width: 200px;
+    height: 100px;
     position: fixed;
     left: 0;
     top: 0;
@@ -29,8 +32,8 @@
 
 #newAtomForm > form{
     text-align: center;
-    width: 150px;
-    height: 50px;
+    width: 200px;
+    height: 100px;
     background-color: blanchedalmond;
     border: black;
     margin: auto;
@@ -44,19 +47,30 @@
 <script lang="ts">
 import Component from "vue-class-component";
 import {Vue,Prop,Emit} from "vue-property-decorator";
+import {ElemType,elemStr} from "../systems/system";
+
+export type submitAtom={
+    element:string;
+}
 
 @Component({
     name: "NewAtomFrom",
 })
 export default class NewAtomForm extends Vue{
     @Prop() private enable: boolean = false;
+    private element: string = "";
+
+    private elemType = elemStr
     constructor(){
         super();
     }
 
     @Emit()
-    submit(e:Event){
-        return;
+    submit(e:Event):submitAtom{
+        alert(this.element)
+        return {
+            element: this.element,
+        };
     }
 
     @Emit()
