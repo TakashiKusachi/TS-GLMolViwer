@@ -38,6 +38,7 @@ class VueApp extends Vue{
             throw e;
         }
         this.renderer.init().then(()=>{
+            this.renderer?.addSelectedEvent((e:SelectedEvent)=>{this.selectAtom(e)})
             this.hideLoaderView();
         })
     }
@@ -73,6 +74,10 @@ class VueApp extends Vue{
         }
     }
 
+    selectAtom(e:SelectedEvent){
+        alert(e.select);
+    }
+
     showLoaderView(){
         this.loaderEnable = true;
     }
@@ -83,7 +88,7 @@ class VueApp extends Vue{
     showNewAtomForm(){
         this.newAtomEnable = true;
     }
-    newAtomSubmit(){
+    newAtomSubmit(e:{element:string}){
         this.newAtomEnable = false;
     }
     newAtomCancel(){
