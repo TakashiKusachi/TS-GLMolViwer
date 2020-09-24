@@ -2,6 +2,7 @@
 
 const ThreadsPlugin = require('threads-plugin');
 const VueLoaderPlugin = require('vue-loader/lib/plugin')
+const HardSourceWebpackPlugin = require('hard-source-webpack-plugin');
 
 module.exports = {
     // モード値を production に設定すると最適化された状態で、
@@ -55,6 +56,7 @@ module.exports = {
         
       }),
       new VueLoaderPlugin(),
+      new HardSourceWebpackPlugin(),
         //new CopyPlugin([{ from: './build' }])
     ],
     externals:{

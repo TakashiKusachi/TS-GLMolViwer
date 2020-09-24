@@ -6,6 +6,7 @@ import {Worker,spawn,Thread,ModuleThread,Transfer} from 'threads'
 import { registerSerializer } from "threads"
 
 import {System} from "../systems"
+import { ElemType,Position } from '../systems/system';
 import {cube_,bond_radius,default_colors} from "./parameters"
 import {MatStdControl} from "../control/MatStdControl"
 
@@ -318,6 +319,26 @@ export class AtomicRender extends Render implements IAtomicRender{
         return gbond;
     }
     
+    async addAtom(position:Position,element:ElemType,name:string){
+        if (this.gatomics === null){
+            throw new Error("gatomicsが初期化される前に呼び出されました。")
+        }
+        else{
+            this.gatomics = new THREE.Group();
+        }
+        const cube = new THREE.SphereGeometry(0.5,cube_,cube_);
+    
+        var meshopt = {}
+        meshopt = {color:default_colors[element]}
+        const material = new THREE.MeshStandardMaterial(meshopt);
+        
+        const box = new THREE.Mesh(cube, material);
+
+        box.name = name;
+        box.position.set(position[0],position[1],position[2]);
+        this.gatomics.add(box);
+        return;
+    }
 
     calcCenter():THREE.Vector3{
         if (this.gatomics == null){

@@ -5,6 +5,7 @@
             <datalist id="elemtypes">
                 <option v-for="elem in elemType" :key="elem" :value="elem"></option>
             </datalist>
+            <input id="px" class="position" type="number"><input id="py" class="position" type="number"><input id="pz" class="position" type="number"><br>
             <input id="newAtomSubmit" type="button" value="追加" @click="submit">
             <input id="newAtomCancel" type="button" value="キャンセル" @click="cancel">
         </form>
@@ -17,11 +18,15 @@
     display:none;
 }
 
+.position{
+    width: 90px;
+}
+
 #newAtomForm{
-    width: 200px;
-    height: 100px;
+    width: 300px;
+    height: 200px;
     position: fixed;
-    left: 0;
+    left: calc(0px);
     top: 0;
     right: 0;
     bottom: 0;
@@ -32,8 +37,8 @@
 
 #newAtomForm > form{
     text-align: center;
-    width: 200px;
-    height: 100px;
+    width: 100%;
+    height: 100%;
     background-color: blanchedalmond;
     border: black;
     margin: auto;
