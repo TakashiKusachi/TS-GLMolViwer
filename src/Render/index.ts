@@ -2,7 +2,6 @@
 import { System } from '../systems';
 import {WorkerAtomicRender,OnAtomicRender} from "./renderInter"
 import { Object3D } from 'three';
-import { ElemType,Position } from '../systems/system';
 
 type Style={
     width: number,
@@ -26,7 +25,7 @@ export interface IAtomicRender{
     start: ()=>Promise<void>;
     stop: ()=>Promise<void>;
     setSystem: (system:System)=>Promise<void>;
-    addAtom: (position:Position,element:ElemType,name:string)=>Promise<void>;
+    //addAtom: (position:,element:,name:)=>Promise<void>;
     clearScene: ()=>Promise<void>;
     addSelectedEvent: (callbacl: (event:SelectedEvent)=>void)=>void;
 }

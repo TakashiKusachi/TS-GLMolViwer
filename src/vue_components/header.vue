@@ -1,21 +1,12 @@
 <template>
     <header id="header-contents">
         <ul class="header_single">
-            <li v-for="rootmenu in nodes" :key="rootmenu.text">
-                {{rootmenu.text}}
-                <ul v-if="rootmenu.childs.length > 0">
-                    <li v-for="submenu in rootmenu.childs" :key="submenu.text">
-                        <label>{{submenu.text}}
-                            <input :id="submenu.id" :type="submenu.type" :multiple="submenu.multiple===true" @click="submenu.cb_click" @change="submenu.cb_change">
-                        </label>
-                    </li>
-                </ul>
-            </li>
+            <header-main-menu v-for="rootmenu in nodes" :key="rootmenu.text" :root="rootmenu"></header-main-menu>
         </ul>
     </header>
 </template>
 
-<style scope>
+<style scoped>
 
 #header-contents{
     height: 20px;
@@ -28,63 +19,19 @@ ul.header_single{
     list-style: none;
 }
 
-ul.header_single > li{
-    height: 20px;
-    padding-right: 10px;
-    padding-left: 10px;
-    background-color: rgb(140, 221, 137);
-    position: relative;
-}
-
-ul.header_single > li > ul{
-    background-color: rgb(137, 187, 221);
-    position: absolute;
-    top: 100%;
-    margin: 0px;
-    left: 0px;
-
-    display: none;
-
-    list-style: none;
-}
-
-ul.header_single > li:hover > ul{
-    display: block;
-}
-
-ul.header_single > li > ul > li{
-    padding-right: 10px;
-    padding-left: 10px;
-    margin: 0px;
-}
-
-ul.header_single > li > ul > li > label > input{
-    display: none;
-}
 </style>
 
 <script lang="ts">
 import Component from "vue-class-component";
 import {Vue,Prop,Emit} from "vue-property-decorator";
-
-
-type node={
-    /**label text */
-    text:string;
-    /**button ID */
-    id:string;
-
-    /**button type */
-    type?:string;
-    multiple?:boolean;
-
-    childs?: node[];
-    cb_click?: (e:Event)=>any;
-    cb_change?: (e:Event)=>any;
-}
+import {node} from "./header/header_util"
+import HeaderMainMenu from "./header/header_mainmenu.vue"
 
 @Component({
     name: "HeaderMenu",
+    components:{
+        HeaderMainMenu,
+    }
 })
 export default class HeaderMenu extends Vue{
     constructor(){
@@ -100,6 +47,7 @@ export default class HeaderMenu extends Vue{
                     id:"New",
                     type:"button",
                     cb_click:this.newSystem,
+                    childs: [],
                 },
                 {
                     text:"OpenFile",
@@ -107,6 +55,7 @@ export default class HeaderMenu extends Vue{
                     type:"file",
                     multiple:true,
                     cb_change:this.openFile,
+                    childs: [],
                 }
             ]
         },
@@ -118,6 +67,7 @@ export default class HeaderMenu extends Vue{
                     text:"BackGraund",
                     id:"BackGraund",
                     type:"color",
+                    childs: [],
                 }
             ]
         },
@@ -130,6 +80,7 @@ export default class HeaderMenu extends Vue{
                     id:"NewAtom",
                     type:"button",
                     cb_click:this.newAtom,
+                    childs: [],
                 }
             ]
         }

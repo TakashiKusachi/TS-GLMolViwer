@@ -1,11 +1,10 @@
 <template>
-    <div id="newAtomForm" :class="form_class">
+    <div id="newAtomForm" :class="form_class" v-on:blur="blur" tabindex="2">
         <form>
             <input id="elemtype" type="text" list="elemtypes" v-model="element"> <br>
             <datalist id="elemtypes">
                 <option v-for="elem in elemType" :key="elem" :value="elem"></option>
             </datalist>
-            <input id="px" class="position" type="number"><input id="py" class="position" type="number"><input id="pz" class="position" type="number"><br>
             <input id="newAtomSubmit" type="button" value="追加" @click="submit">
             <input id="newAtomCancel" type="button" value="キャンセル" @click="cancel">
         </form>
@@ -18,15 +17,11 @@
     display:none;
 }
 
-.position{
-    width: 90px;
-}
-
 #newAtomForm{
-    width: 300px;
-    height: 200px;
+    width: 200px;
+    height: 100px;
     position: fixed;
-    left: calc(0px);
+    left: 0;
     top: 0;
     right: 0;
     bottom: 0;
@@ -37,8 +32,8 @@
 
 #newAtomForm > form{
     text-align: center;
-    width: 100%;
-    height: 100%;
+    width: 200px;
+    height: 100px;
     background-color: blanchedalmond;
     border: black;
     margin: auto;
@@ -51,7 +46,7 @@
 
 <script lang="ts">
 import Component from "vue-class-component";
-import {Vue,Prop,Emit} from "vue-property-decorator";
+import {Vue,Prop,Emit,Watch} from "vue-property-decorator";
 import {ElemType,elemStr} from "../systems/system";
 
 export type submitAtom={
@@ -83,11 +78,28 @@ export default class NewAtomForm extends Vue{
         return;
     }
 
+    blur(){
+        this.cancel();
+    }
+
     get form_class(){
         return{
             "is-hide": !this.enable,
         }
     }
+    @Watch("enable")
+    change_enable(newEnable:boolean,oldEnable:boolean){
+        console.info("call change_enable")
+        if(newEnable){
+            console.info("new enable: true")
+            let elem = document.getElementById("newAtomForm");
+            if (elem !== null){
+                console.info("forcus")
+                elem.focus()
+            }
+        }
+    }
+    
 }
 
 </script>

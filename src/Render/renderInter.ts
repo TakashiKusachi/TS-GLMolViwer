@@ -4,7 +4,6 @@ import {Worker,spawn,Thread,ModuleThread,Transfer} from 'threads'
 import Stats from 'three/examples/jsm/libs/stats.module';
 
 import { System } from '../systems';
-import {Position,ElemType} from '../systems/system'
 import {RenderWorker} from "./worker/render_worker"
 import {AnyCanvas,SelectedEvent,IAtomicRender,_OffscreenCanvas} from "."
 import {NotSupportOffscreenCanvas} from "./errorHandler"
@@ -189,10 +188,6 @@ export class WorkerAtomicRender extends CanvasEventHandler implements IAtomicRen
         })
     }
 
-    async addAtom(position:Position,element:ElemType,name:string){
-        
-    }
-
     async tick(sec:TickCallBack){
         this.stats_update();
     }
@@ -203,7 +198,6 @@ export class WorkerAtomicRender extends CanvasEventHandler implements IAtomicRen
 /**
  * 継承関係じゃなくてもいい気はする。
  */
-/*
 export class OnAtomicRender extends CanvasEventHandler implements IAtomicRender{
     private render: AtomicRender|undefined;
     private system: System | null;
@@ -281,4 +275,3 @@ export class OnAtomicRender extends CanvasEventHandler implements IAtomicRender{
 
     }
 }
-*/
