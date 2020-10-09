@@ -1,5 +1,5 @@
 
-export const cube_:number = 10;
+export const cube_segments:number = 10;
 
 export const default_colors:Array<number> = [
     /* ANY */0xffffff,
@@ -15,4 +15,5 @@ export const default_colors:Array<number> = [
     /*  Ne */0xffffff,
 ]
 
+export const bond_segments = 10
 export const bond_radius = 0.1

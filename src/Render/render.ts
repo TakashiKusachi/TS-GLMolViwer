@@ -6,7 +6,7 @@ import {Worker,spawn,Thread,ModuleThread,Transfer} from 'threads'
 import { registerSerializer } from "threads"
 
 import {System} from "../systems"
-import {cube_,bond_radius,default_colors} from "./parameters"
+import {cube_segments,bond_radius,bond_segments,default_colors} from "./parameters"
 import {MatStdControl} from "../control/MatStdControl"
 
 
@@ -44,16 +44,11 @@ export abstract class Render{
 
     constructor(canvas:AnyCanvas){
 
-        //this.stats = Stats();
-        //this.stats.showPanel(0);
         console.log(canvas)
         this.renderer = new THREE.WebGLRenderer({
             canvas: canvas,
         });
         
-        //this.stats.domElement.style.position = "fixed";
-        //this.stats.domElement.style.top = "50%";
-        //document.body.appendChild(this.stats.domElement);
 
         this.camera = new THREE.PerspectiveCamera(45);
         this.camera.position.set(0, 0, +30);
@@ -61,12 +56,10 @@ export abstract class Render{
 
         this.scene = new THREE.Scene();
         this.light = new THREE.PointLight(0xffffff , 1.0);
-        //this.clearScene();
 
         this.mouse = new Vector2(0,0);
         this.raycaster = new Raycaster();
 
-        //this.resize();
         this.tick();
     }
 
@@ -249,7 +242,7 @@ export class AtomicRender extends Render implements IAtomicRender{
             let elem = atom.element;
             let name = atom.name;
             
-            const cube = new THREE.SphereGeometry(0.5,cube_,cube_);
+            const cube = new THREE.SphereGeometry(0.5,cube_segments,cube_segments);
     
             var meshopt = {}
             meshopt = {color:default_colors[elem]}
@@ -281,7 +274,7 @@ export class AtomicRender extends Render implements IAtomicRender{
     
             let bond_vec = new THREE.Vector3(bond.vector[0],bond.vector[1],bond.vector[2]);
             let bond_centor = new THREE.Vector3(bond.position[0],bond.position[1],bond.position[2])
-            const cube = new THREE.CylinderGeometry(bond_radius,bond_radius,bond_vec.length(),10,1,true);
+            const cube = new THREE.CylinderGeometry(bond_radius,bond_radius,bond_vec.length(),bond_segments,1,true);
             const material = new THREE.MeshStandardMaterial({color:0xf0f0f0});
     
             const box = new THREE.Mesh(cube,material);
