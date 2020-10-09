@@ -11,11 +11,8 @@ import {MatStdControl} from "../control/MatStdControl"
 
 
 import {AnyCanvas,SelectedEvent,IAtomicRender} from "."
-import {Worker as AtomWorker} from "./worker/atomdrower"
-import {GroupSerializerImplementation} from "./worker/serializer"
 import { resolve } from 'path';
 
-registerSerializer(GroupSerializerImplementation);
 
 export type DMouseEvent = {
     clientX:number,clientY:number,button:number,
@@ -206,7 +203,8 @@ export class AtomicRender extends Render implements IAtomicRender{
         console.log("WorkerSet",system);
         this.stop();
         this.clearScene();
-        this.system = system;
+
+        this.system = System.getSystem(system);
         let ret = new Promise<void>(async (resolve,reject)=>{
             await this.drowSystem2Scene();
             this.start();
@@ -224,29 +222,15 @@ export class AtomicRender extends Render implements IAtomicRender{
         let accPos = new THREE.Vector3(0,0,0);
 
         
-        let objLoader = new THREE.ObjectLoader()
+        this.gatomics = this.drowAtoms(system,accPos)
+        this.gbond = this.drowBonds(system,accPos)
 
-        let atomdrower = await spawn<AtomWorker>(new Worker("./worker/atomdrower.ts"))
-        //let bonddrower = await spawn(new Worker("./worker/bonddrower.ts"))
-        //await atomdrower.eventObserver();
-        let groups= await atomdrower.workerThread(system) as THREE.Group;
-        //let gbonds = await bonddrower(system) as THREE.Group;
-        console.log("Drow",groups);
-        this.gatomics = groups.children.find((value)=>{return value.name === "AtomicsGroup"}) as Group;
-        this.gbond = groups.children.find((value)=>{return value.name === "BondsGroup"}) as Group;
 
         this.addObject(this.gatomics);
         this.addObject(this.gbond);
-
-        Thread.terminate(atomdrower);
-
     }
+
     /**
-     * この関数は、worker(./worker/atomdrower.ts)でも作成されていますが、
-     * これは変更予定のために残してあります。
-     * 具体的には、このAtomicRenderクラスはworkerスレッドから呼ばれることも
-     * 想定すると、AtomのObjectを別スレッドで生成するメリットがないため、
-     * 同一スレッド下で生成を行う変更のために残してあります。
      * @param _system 
      * @param accPos 
      */
