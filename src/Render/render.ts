@@ -1,9 +1,6 @@
 
 import * as THREE from 'three';
 import { Object3D, Vector3, Raycaster, Vector2, GridHelper, Group } from 'three';
-import Stats from 'three/examples/jsm/libs/stats.module';
-import {Worker,spawn,Thread,ModuleThread,Transfer} from 'threads'
-import { registerSerializer } from "threads"
 
 import {System} from "../systems"
 import {cube_segments,bond_radius,bond_segments,default_colors} from "./parameters"
@@ -11,7 +8,6 @@ import {MatStdControl} from "../control/MatStdControl"
 
 
 import {AnyCanvas,SelectedEvent,IAtomicRender} from "."
-import { resolve } from 'path';
 
 
 export type DMouseEvent = {
@@ -23,6 +19,13 @@ export type TickCallBack={
     isRun:boolean,
 }
 
+/** 
+ * Three.js/WebGLに基づきcanvasを操作するクラス。
+ * 
+ * 基本的な役割は,sceneやカメラの保持、そのほかユーザ操作のイベントを受け取る。
+ * ほとんど、AtomicRender専用なら分ける必要がなくないかと言われたらその通り。
+ * 
+ */
 export abstract class Render{
 
     private renderer: THREE.WebGLRenderer;
@@ -42,6 +45,13 @@ export abstract class Render{
     private cbSelected: Array<(event:SelectedEvent)=>void> = [];
     private tickHandler: Array<()=>void> = []
 
+    /**
+     * コンストラクタ
+     * 
+     * カメラ、カメラコントロール、シーン、レンダーの初期化を行っています。
+     * 
+     * @param canvas 描画対象のキャンバス。AnyCanvasとしているが、現使用では、Offscreencanvasのみ
+     */
     constructor(canvas:AnyCanvas){
 
         console.log(canvas)
@@ -63,6 +73,15 @@ export abstract class Render{
         this.tick();
     }
 
+    /**
+     * カメラを指定した点を見る方向に設定します。
+     * 
+     * 内部でカメラコントローラにそのまま引き渡します。
+     * 
+     * @param valx 点のx座標(number)、もしくは座標(Vector3)
+     * @param valy 
+     * @param valz 
+     */
     lookAt(valx: number | Vector3,valy?:number, valz?:number){
         this.control.lookAt(valx,valy,valz);
     }
@@ -88,14 +107,24 @@ export abstract class Render{
         )
     }
 
+    /**
+     * レンダーを停止します。
+     */
     async stop(){
         this._isRun = false;
     }
 
+    /**
+     * レンダーを再開します。
+     */
     async start(){
         this._isRun = true;
     }
 
+    /**
+     * 
+     * @return 
+     */
     get isRun(){
         return new Promise<boolean>((resolve)=>{
             resolve(this._isRun)
@@ -106,6 +135,10 @@ export abstract class Render{
         return this._isTick;
     }
 
+    /**
+     * 
+     * @hidden
+     */
     tick(){
         const sec = performance.now() / 1000;
         if(!this.isTick)return;
@@ -121,6 +154,15 @@ export abstract class Render{
 
     abstract tickCallBack(sec:TickCallBack):void;
 
+
+    /**
+     * マウスによるcanvasクリックのcallback関数
+     * 
+     * Three.Raycasterを使ってオブジェクトとの交点検出を行い、クリックされたオブジェクトを検出する。
+     * 
+     * @param mouse_x 
+     * @param mouse_y 
+     */
     click(mouse_x: number,mouse_y:number){
        this.mouse.x = mouse_x;
        this.mouse.y = mouse_y;
@@ -131,23 +173,45 @@ export abstract class Render{
             this.selected(obj,obj.name);
         }
     }
-
+    
+    /**
+     * コールバック関数の設定メソッド
+     * 
+     * @param callback 
+     */
     addSelectedEvent(callback: (event:SelectedEvent)=>void){
         this.cbSelected.push(callback);
     }
 
+    /**
+     * クリック等によるオブジェクトを選択したときに、選択したイベントをコールバック関数に渡す処理。
+     * 
+     * @param obj Not Used
+     * @param name 
+     */
     selected(obj:Object3D,name: string){
         this.cbSelected.forEach((cb)=>{
             cb({select:name})
         })
     }
 
+    /**
+     * 画面リサイズ処理のcallback関数
+     * 
+     * @param height 
+     * @param width 
+     */
     resize(height: number,width:number){
         this.renderer.setSize(width,height);
         this.camera.aspect = width/height;
         this.camera.updateProjectionMatrix();
     }
 
+    /**
+     * sceneにオブジェクトを追加する関数
+     * 
+     * @param obj 
+     */
     addObject(obj:THREE.Object3D){
         this.scene.add(obj);
     }
@@ -170,6 +234,9 @@ export abstract class Render{
     }
 }
 
+/**
+ * 
+ */
 export class AtomicRender extends Render implements IAtomicRender{
     private system : System|null;
     
