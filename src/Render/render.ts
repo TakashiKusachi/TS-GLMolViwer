@@ -9,7 +9,6 @@ import {MatStdControl} from "../control/MatStdControl"
 
 import {AnyCanvas,SelectedEvent,IAtomicRender} from "."
 
-
 export type DMouseEvent = {
     clientX:number,clientY:number,button:number,
 } | MouseEvent
