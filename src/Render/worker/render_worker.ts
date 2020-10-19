@@ -27,6 +27,8 @@ const render_worker = {
     start,
     stop,
 
+    deleteAtom,
+
 
     __setSelectEventObserber,
     __setTickCallBack,
@@ -77,6 +79,11 @@ function start(){
 function stop(){
     let render = obj_check();
     render.stop();
+}
+
+function deleteAtom(name: string){
+    let render = obj_check();
+    render.deleteAtom(name);
 }
 
 function click(mouse_x:number,mouse_y:number){

@@ -75,6 +75,7 @@ class VueApp extends Vue{
     }
 
     selectAtom(e:SelectedEvent){
+        this.renderer?.deleteAtom(e.select);
         alert(e.select);
     }
 

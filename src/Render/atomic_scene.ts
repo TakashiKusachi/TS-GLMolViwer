@@ -5,28 +5,16 @@ import {Scene,Vector3, Object3D} from 'three'
 import {cube_segments,bond_radius,bond_segments,default_colors} from "./parameters"
 import {System,IAtom} from "../systems"
 
-type atom_bond = {
-    atoma: Object3D;
-    atomb: Object3D;
-    bond: Object3D;
-}
-
-class TableAtomBond{
-    private bond_list: atom_bond[];
-
-    constructor(){
-        this.bond_list = [];
-    }
-}
-
-class AtomicScene{
+export class AtomicScene{
     private system?: System;
+    private gatomics?: THREE.Group;
+    private gbonds?: THREE.Group;
 
     /** 重心 */
-    private weightCenter: Vector3;
+    private accumPos: Vector3;
 
     constructor(){
-        this.weightCenter = new Vector3(0,0,0);
+        this.accumPos = new Vector3(0,0,0);
     }
 
     /**
@@ -41,6 +29,9 @@ class AtomicScene{
         this.system = system;
         let gatomics = this.drowAtoms(system);
         let gbonds = this.drowBonds(system);
+
+        this.gatomics = gatomics;
+        this.gbonds = gbonds;
     }
 
     /**
@@ -49,7 +40,41 @@ class AtomicScene{
      * @return 重心
      */
     getWeightCenter():Vector3{
-        return this.weightCenter;
+        let center = this.accumPos.divideScalar(this.getNumAtoms());
+        return center;
+    }
+
+    getNumAtoms():number{
+        if (this.gatomics == undefined){
+            return 0;
+        }
+        else{
+            return this.gatomics.children.length;
+        }
+    }
+
+    getObjects():THREE.Object3D{
+        let objects = new THREE.Group();
+        if ( this.gatomics != undefined) objects.add(this.gatomics);
+        if ( this.gbonds != undefined) objects.add(this.gbonds);
+        objects.name = "ATOMIC_SCENE_ALL_OBJECTS";
+        let center = this.getWeightCenter();
+        objects.translateX(-center.x);
+        objects.translateY(-center.y);
+        objects.translateZ(-center.z);
+
+        return objects;
+    }
+
+    deleteAtom(name:string){
+        if (this.gatomics == undefined)return;
+
+        let hitobject = this.gatomics.children.find((value)=>{
+            return value.name == name;
+        })
+
+        if(hitobject == undefined)return;
+        this.gatomics.remove(hitobject);
     }
 
     /**
@@ -61,7 +86,7 @@ class AtomicScene{
      */
     drowAtoms(_system: System):THREE.Group{
         let system = _system
-        let center = new Vector3(0,0,0);
+        let accum = new Vector3(0,0,0);
     
         let gatomics = new THREE.Group();
         let iter_atom = system.getAtoms();
@@ -84,14 +109,10 @@ class AtomicScene{
     
             box.name = name;
             box.position.set(pos[0],pos[1],pos[2]);
-            center = center.add(box.position);
+            accum = accum.add(box.position);
             gatomics.add(box);
         }
-        center  = center.divideScalar(gatomics.children.length);
-        this.weightCenter = center;
-        gatomics.translateX(-center.x);
-        gatomics.translateY(-center.y);
-        gatomics.translateZ(-center.z);
+        this.accumPos = accum;
         gatomics.name = "AtomicsGroup";
         return gatomics;
     }
@@ -99,7 +120,6 @@ class AtomicScene{
     drowBonds(_system:System){
         let system = _system;
         let gbond = new THREE.Group();
-        let center = this.weightCenter;
         let iter_bond = system.getBond();
         for(let node = iter_bond.next();node.done == false;node=iter_bond.next()){
             let bond = node.value;
@@ -121,15 +141,15 @@ class AtomicScene{
             gbond.add(box);
     
         }
-        gbond.translateX(-center.x);
-        gbond.translateY(-center.y);
-        gbond.translateZ(-center.z);
         gbond.name = "BondsGroup";
         return gbond;
     }
 
     clearScene(){
         this.system = undefined;
-        this.weightCenter = new Vector3(0,0,0);
+        this.accumPos = new Vector3(0,0,0);
+        this.gatomics = undefined;
+        this.gbonds = undefined;
     }
+
 }

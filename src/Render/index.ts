@@ -25,6 +25,7 @@ export interface IAtomicRender{
     start: ()=>Promise<void>;
     stop: ()=>Promise<void>;
     setSystem: (system:System)=>Promise<void>;
+    deleteAtom: (name:string)=>Promise<void>;
     //addAtom: (position:,element:,name:)=>Promise<void>;
     clearScene: ()=>Promise<void>;
     addSelectedEvent: (callbacl: (event:SelectedEvent)=>void)=>void;

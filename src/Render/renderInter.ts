@@ -144,6 +144,10 @@ export class WorkerAtomicRender extends CanvasEventHandler implements IAtomicRen
         await this.worker?.clearScene();
     }
 
+    async deleteAtom(name:string){
+        await this.worker?.deleteAtom(name);
+    }
+
     async resize(height: number,width: number){
         await this.worker?.resize(height,width);
     }
@@ -244,6 +248,10 @@ export class OnAtomicRender extends CanvasEventHandler implements IAtomicRender{
 
     addSelectedEvent(callback: (event:SelectedEvent)=>void){
         this.render?.addSelectedEvent(callback);
+    }
+
+    async deleteAtom(name:string){
+        this.render?.deleteAtom(name);
     }
 
     resize(height:number,width:number){
