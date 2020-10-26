@@ -10,6 +10,7 @@ import {Vue,Prop} from "vue-property-decorator";
 import NewAtomForm from './vue_components/addAtom.vue'
 import LoaderView from "./vue_components/loaderView.vue"
 import HeaderMenu from "./vue_components/header.vue"
+import Propaties from "./vue_components/propaties/index.vue"
 
 @Component({
     el: "#vueapp",
@@ -17,6 +18,7 @@ import HeaderMenu from "./vue_components/header.vue"
         NewAtomForm,
         LoaderView,
         HeaderMenu,
+        Propaties,
     }
 })
 class VueApp extends Vue{
