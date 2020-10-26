@@ -1,5 +1,5 @@
 <template>
-    <li>
+    <li class="header_menu_main_content">
         {{root.text}}
         <ul v-if="root.childs.length > 0" >
             <header-sub-menu v-for="submenu in root.childs" :key="submenu.text" :root="submenu" ></header-sub-menu>
@@ -9,16 +9,23 @@
 
 <style scoped>
 
-li{
-    height: 20px;
-    padding-right: 10px;
-    padding-left: 10px;
-    background-color: rgb(140, 221, 137);
+li.header_menu_main_content{
+    height: 100%;
+    padding-right: 0.5em;
+    padding-left: 0.5em;
+    background-color: dimgray;
+    border-width: 1px;
+    border-style: none solid none none;
+    border-color: black;
+    color: white;
     position: relative;
 }
 
-li > ul{
-    background-color: rgb(137, 187, 221);
+li.header_menu_main_content:hover{
+    background-color: gray;
+}
+
+li.header_menu_main_content > ul{
     position: absolute;
     top: 100%;
     margin: 0px;
@@ -29,7 +36,7 @@ li > ul{
     list-style: none;
 }
 
-li:hover > ul{
+li.header_menu_main_content:hover > ul{
     display: block;
 }
 </style>

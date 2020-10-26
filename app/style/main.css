@@ -26,6 +26,7 @@ html, body{
 
 #view-area {
     float: left;
+    border: 2px ridge;
     width: 70%;
     height: 100%;
 }

@@ -9,14 +9,15 @@
 <style scoped>
 
 #header-contents{
-    height: 20px;
+    height: 1.5em;
 }
 
 ul.header_single{
     display: flex;
-    height: 20px;
-    background-color: rgb(137, 187, 221);
+    height: 100%;
+    background-color: dimgray;
     list-style: none;
+    border-left: 1px solid black;
 }
 
 </style>

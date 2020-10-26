@@ -1,5 +1,5 @@
 <template>
-    <li>
+    <li class="header_menu_sub_content">
         <label>{{root.text}}
             <input :id="root.id" :type="root.type" :multiple="root.multiple===true" 
                 @click="root.cb_click!==undefined? root.cb_click($event):null"
@@ -13,18 +13,23 @@
 
 <style scoped>
 
- li{
-    padding-right: 10px;
-    padding-left: 10px;
+ li.header_menu_sub_content{
+    padding-right: 1em;
+    padding-left: 2em;
+    background-color: dimgray;
+    color: white;
     margin: 0px;
 }
 
-li > label > input{
+li.header_menu_sub_content:hover{
+    background-color: gray;
+}
+
+li.header_menu_sub_content > label > input{
     display: none;
 }
 
-li > ul{
-    background-color: rgb(137, 187, 221);
+li.header_menu_sub_content > ul{
     position: absolute;
     top: 0%;
     margin: 0px;
@@ -35,7 +40,7 @@ li > ul{
     list-style: none;
 }
 
-li:hover >  ul{
+li.header_menu_sub_content:hover >  ul{
     display: block;
 }
 </style>
