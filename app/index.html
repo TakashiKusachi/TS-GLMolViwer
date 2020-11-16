@@ -8,7 +8,7 @@
         <div id="vueapp">
             <loader-view :enable="loaderEnable"></loader-view>
             <new-atom-form :enable="newAtomEnable" @submit="newAtomSubmit" @cancel="newAtomCancel"></new-atom-form>
-            <header-menu @new-system="New" @open-file="openFile" @new-atom="showNewAtomForm"></header-menu>
+            <header-menu :nodes="nodes"></header-menu>
 
             <div id="main-contents">
                 <div class="content" id="view-area">

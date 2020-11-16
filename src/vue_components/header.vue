@@ -19,13 +19,12 @@ ul.header_single{
     list-style: none;
     border-left: 1px solid black;
 }
-
 </style>
 
 <script lang="ts">
 import Component from "vue-class-component";
 import {Vue,Prop,Emit} from "vue-property-decorator";
-import {node} from "./header/header_util"
+import {node, submenu_type} from "./header/header_util"
 import HeaderMainMenu from "./header/header_mainmenu.vue"
 
 @Component({
@@ -38,72 +37,7 @@ export default class HeaderMenu extends Vue{
     constructor(){
         super();
     }
-    private nodes:node[] = [
-        {
-            text:"File",
-            id:"File",
-            childs:[
-                {
-                    text:"New",
-                    id:"New",
-                    type:"button",
-                    cb_click:this.newSystem,
-                    childs: [],
-                },
-                {
-                    text:"OpenFile",
-                    id:"OpenFile",
-                    type:"file",
-                    multiple:true,
-                    cb_change:this.openFile,
-                    childs: [],
-                }
-            ]
-        },
-        {
-            text:"Viewer",
-            id:"Viewer",
-            childs:[
-                {
-                    text:"BackGraund",
-                    id:"BackGraund",
-                    type:"color",
-                    childs: [],
-                }
-            ]
-        },
-        {
-            text:"Edit",
-            id:"Edit",
-            childs:[
-                {
-                    text:"NewAtom",
-                    id:"NewAtom",
-                    type:"button",
-                    cb_click:this.newAtom,
-                    childs: [],
-                }
-            ]
-        }
-    ]
-
-    @Emit("new-system")
-    newSystem(e:Event){
-        return;
-    }
-
-    @Emit("open-file")
-    openFile(e:Event){
-        console.info("HeaderMenu openFileEvent")
-        let target = e.target as HTMLInputElement;
-        let files = target.files as FileList;
-        return files;
-    }
-
-    @Emit("new-atom")
-    newAtom(e:Event){
-        return;
-    }
+    @Prop() private nodes? :node[];
 
 }
 </script>

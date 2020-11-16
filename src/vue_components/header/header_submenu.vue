@@ -1,11 +1,10 @@
 <template>
     <li class="header_menu_sub_content">
         <label>{{root.text}}
-            <input :id="root.id" :type="root.type" :multiple="root.multiple===true" 
-                @click="root.cb_click!==undefined? root.cb_click($event):null"
-                @change="root.cb_change!==undefined? root.cb_change($event):null">
+            <input v-if="is_button()" type="button" @click="root.cb_click"/>
+            <input v-if="is_file()" type="file" :multiple="root.multiple===true" @change="root.cb_change"/>
         </label>
-        <ul v-if="root.childs.length > 0">
+        <ul v-if="is_parent()">
             <header-sub-menu v-for="submenu in root.childs" :key="submenu.text" :root="submenu"></header-sub-menu>
         </ul>
     </li>
@@ -48,7 +47,7 @@ li.header_menu_sub_content:hover >  ul{
 <script lang="ts">
 import Component from "vue-class-component";
 import {Vue,Prop,Emit} from "vue-property-decorator";
-import {node} from "./header_util";
+import {node,submenu_type} from "./header_util";
 
 @Component({
     name: "HeaderSubMenu",
@@ -61,13 +60,17 @@ export default class HeaderSubMenu extends Vue{
     constructor(){
         super();
     }
-    _run_callback(cb_fn?:(obj?:any)=>void){
-        if (cb_fn !== undefined){
-            return cb_fn
-        }
-        else{
-            return (obj?:any)=>null;
-        }
+
+    is_parent():boolean{
+        return this.root?.type==submenu_type.PARENT && this.root.childs.length > 0;
+    }
+
+    is_button():boolean{
+        return this.root?.type==submenu_type.BUTTON;
+    }
+
+    is_file():boolean{
+        return this.root?.type==submenu_type.FILE;
     }
 }
 

@@ -11,6 +11,7 @@ import NewAtomForm from './vue_components/addAtom.vue'
 import LoaderView from "./vue_components/loaderView.vue"
 import HeaderMenu from "./vue_components/header.vue"
 import Propaties from "./vue_components/propaties/index.vue"
+import {node, submenu_type} from "./vue_components/header/header_util"
 
 @Component({
     el: "#vueapp",
@@ -29,6 +30,48 @@ class VueApp extends Vue{
     private newAtomEnable = false;
     private loaderEnable = false;
 
+    private nodes:node[] = [
+        {
+            text:"File",
+            type: submenu_type.PARENT,
+            childs:[
+                {
+                    text:"New",
+                    type:submenu_type.BUTTON,
+                    cb_click:this.New,
+                },
+                {
+                    text:"OpenFile",
+                    type:submenu_type.FILE,
+                    multiple:true,
+                    cb_change:this.openFile,
+                }
+            ]
+        },
+        {
+            text:"Viewer",
+            type:submenu_type.PARENT,
+            childs:[
+                {
+                    text:"BackGraund",
+                    type:submenu_type.BUTTON,
+                    cb_click:(e)=>{},
+                }
+            ]
+        },
+        {
+            text:"Edit",
+            type:submenu_type.PARENT,
+            childs:[
+                {
+                    text:"NewAtom",
+                    type:submenu_type.BUTTON,
+                    cb_click:this.showNewAtomForm,
+                }
+            ]
+        },
+    ]
+
     mounted(){
         this.showLoaderView();
         try{
@@ -45,13 +88,17 @@ class VueApp extends Vue{
         })
     }
 
-    New(){
+    New(e:Event){
+        console.log(this.renderer);
         if(this.renderer === undefined)return;
         this.renderer.clearScene();
         this.system = null;
     }
 
-    openFile(files:FileList){
+    openFile(e:Event){
+        console.info("HeaderMenu openFileEvent")
+        let target = e.target as HTMLInputElement;
+        let files = target.files as FileList;
         this.showLoaderView();
         if(this.renderer === undefined)return;
 
@@ -74,6 +121,7 @@ class VueApp extends Vue{
             alert(`指定したファイルは対応外です。対応したファイルの入力してください。`);
             this.hideLoaderView();
         }
+        target.value = "";
     }
 
     selectAtom(e:SelectedEvent){
@@ -88,7 +136,7 @@ class VueApp extends Vue{
         this.loaderEnable = false;
     }
 
-    showNewAtomForm(){
+    showNewAtomForm(e?:Event){
         this.newAtomEnable = true;
     }
     newAtomSubmit(e:{element:string}){
