@@ -1,6 +1,7 @@
 <template>
     <div id="loader-bg" :class="loader_class">
         <div id="loader" :class="loader_class">
+            <vue-loaders-ball-plus color="gray" scale="1"></vue-loaders-ball-plus>
             <p>NowLoading</p>
         </div>
     </div>
@@ -45,6 +46,10 @@
 <script lang="ts">
 import Component from "vue-class-component";
 import {Vue,Prop,Emit} from "vue-property-decorator";
+import 'vue-loaders/dist/vue-loaders.css'
+import VueLoaders from 'vue-loaders'
+
+Vue.use(VueLoaders)
 
 @Component({
     name: "LoaderView",
