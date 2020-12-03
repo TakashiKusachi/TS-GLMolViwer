@@ -6,37 +6,34 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack -w",
+    "serve": "serve -s ./app -l 5000",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/node": "^14.6.3",
-    "@types/stats": "^0.16.30",
-    "copy-webpack-plugin": "^6.1.0",
-    "css-loader": "^4.2.2",
-    "style-loader": "^1.2.1",
+    "css-loader": "^5.0.1",
+    "serve": "^11.3.2",
+    "style-loader": "^2.0.0",
     "ts-loader": "^8.0.3",
     "typedoc": "^0.19.2",
     "typescript": "^4.0.2",
     "vue": "^2.6.12",
-    "vue-loader": "^15.9.3",
-    "vue-property-decorator": "^9.0.2",
+    "vue-class-component": "^7.2.6",
+    "vue-loader": "^15.9.5",
+    "vue-loaders": "^4.1.1",
+    "vue-property-decorator": "^9.1.2",
     "vue-template-compiler": "^2.6.12",
     "webpack": "^4.44.1",
-    "webpack-cli": "^3.3.12",
-    "webpack-dev-server": "^3.11.0",
-    "worker-loader": "^3.0.2"
+    "webpack-cli": "^4.2.0",
+    "webpack-dev-server": "^3.11.0"
   },
   "dependencies": {
-    "@vue/cli": "^4.5.4",
+    "@babel/types": "^7.12.7",
     "threads": "^1.6.3",
     "threads-plugin": "^1.3.3",
     "three": "^0.120.1",
-    "tiny-worker": "^2.3.0",
-    "vue-class-component": "^7.2.5",
-    "vue-cli": "^2.9.6",
-    "vue-loaders": "^4.1.1"
+    "tiny-worker": "^2.3.0"
   }
 }
