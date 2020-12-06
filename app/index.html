@@ -2,24 +2,9 @@
 <html>
     <head>
         <title>index page</title>
-        <link rel="stylesheet" href="style/main.css">
     </head>
     <body>
-        <div id="vueapp">
-            <loader-view :enable="loaderEnable"></loader-view>
-            <new-atom-form :enable="newAtomEnable" @submit="newAtomSubmit" @cancel="newAtomCancel"></new-atom-form>
-            <header-menu :nodes="nodes"></header-menu>
-
-            <div id="main-contents">
-                <div class="content" id="view-area">
-                    <canvas id="gl_canvas"></canvas>
-                </div>
-                <propaties></propaties>
-            </div>
-            <div id="fotter-contents">
-                <div id="state"></div>
-            </div>
-        </div>
-        <script src="main.js" type="text/javascript"></script>        
+        <div id="vueapp"></div>
+        <script src="./main.js" type="text/javascript"></script>        
     </body>
 </html>

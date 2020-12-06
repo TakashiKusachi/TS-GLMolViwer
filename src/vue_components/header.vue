@@ -6,13 +6,13 @@
     </header>
 </template>
 
-<style scoped>
+<style lang="scss" scoped>
 
-#header-contents{
+#header-contents {
     height: 1.5em;
 }
 
-ul.header_single{
+ul.header_single {
     display: flex;
     height: 100%;
     background-color: dimgray;
