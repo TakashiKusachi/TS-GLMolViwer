@@ -1,0 +1,37 @@
+version: '3.7'
+services:
+    nginx:
+        build:
+            context: ./nginx_server
+            dockerfile: Dockerfile
+        networks:
+            - wp_net
+        volumes:
+            - ./front/app:/usr/share/nginx/html
+        depends_on: 
+            - socketserver
+        links:
+            - socketserver
+        ports:
+            - 8081:80
+        environment:
+            SOCKET_SERVER: socketserver:8888
+
+    socketserver:
+        build:
+            context: ./appli_server
+            dockerfile: Dockerfile
+        volumes:
+            - ./appli_server/templates:/templates
+        networks:
+            - wp_net
+        ports:
+            - 8888:8888
+
+networks:
+    wp_net:
+        driver: bridge
+
+volumes:
+    mysql_volume:
+        driver: local

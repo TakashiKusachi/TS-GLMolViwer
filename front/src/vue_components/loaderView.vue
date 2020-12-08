@@ -1,7 +1,7 @@
 <template>
     <div id="loader-bg" :class="loader_class">
         <div id="loader" :class="loader_class">
-            <vue-loaders-ball-plus color="gray" scale="1"></vue-loaders-ball-plus>
+            <vue-loaders name="ball-pulse" color="gray" scale="1"></vue-loaders>
             <p>NowLoading</p>
         </div>
     </div>

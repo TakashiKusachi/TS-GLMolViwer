@@ -24,8 +24,8 @@ ul.header_single {
 <script lang="ts">
 import Component from "vue-class-component";
 import {Vue,Prop,Emit} from "vue-property-decorator";
-import {node, submenu_type} from "./header/header_util"
-import HeaderMainMenu from "./header/header_mainmenu.vue"
+import {node, submenu_type} from "./header_util"
+import HeaderMainMenu from "./header_mainmenu.vue"
 
 @Component({
     name: "HeaderMenu",

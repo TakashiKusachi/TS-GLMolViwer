@@ -1,6 +1,8 @@
 
 import index from "./vue_components/index.vue"
-let vueapp = new index().$mount("#vueapp");
+var vueapp = new index();
+vueapp.$mount("#vueapp");
+
 /*
 class Application{
     
