@@ -33,9 +33,11 @@ services:
 
     front_dev:
         build:
-            context: ./front
+            context: ./frontend
         volumes:
             - front_code:/app/app
+
+    
 
 networks:
     wp_net:
