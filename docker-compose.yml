@@ -1,19 +1,18 @@
 version: '3.7'
 services:
     nginx:
-        build:
-            context: ./nginx_server
-            dockerfile: Dockerfile
+        image: nginx:1.18
         networks:
             - wp_net
         volumes:
-            - ./front/app:/usr/share/nginx/html
+            - ./nginx_server:/etc/nginx/conf.d:ro
+            - front_code:/usr/share/nginx/html
         depends_on: 
             - socketserver
         links:
             - socketserver
         ports:
-            - 8081:80
+            - 8080:80
         environment:
             SOCKET_SERVER: socketserver:8888
 
@@ -23,10 +22,20 @@ services:
             dockerfile: Dockerfile
         volumes:
             - ./appli_server/templates:/templates
+        environment: 
+            CORS_ALLOWED: http://localhost:8080
+            HOST: 0.0.0.0
+            PORT: 8888
+        expose:
+            - "8888"
         networks:
             - wp_net
-        ports:
-            - 8888:8888
+
+    front_dev:
+        build:
+            context: ./front
+        volumes:
+            - front_code:/app/app
 
 networks:
     wp_net:
@@ -34,4 +43,6 @@ networks:
 
 volumes:
     mysql_volume:
+        driver: local
+    front_code:
         driver: local

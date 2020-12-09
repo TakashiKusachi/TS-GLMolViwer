@@ -9,7 +9,8 @@
         </div>
         <div id="fotter-contents">
             <div id="state">
-                <div id="state_icon" v-bind:class="{blue:is_server_connected, red:!is_server_connected}"></div><span>{{is_server_connected?"Connected":"Not Connected"}}</span>
+                <div id="state_icon" v-bind:class="{blue:is_server_connected, red:!is_server_connected}"></div>
+                <span>{{is_server_connected?"Connected":"Not Connected"}}</span>
             </div>
         </div>
     </div>
@@ -40,7 +41,7 @@ $FOTTER_SIZE    : 20px;
 }
 
 #main-contents{
-    /*overflow: hidden;*/
+    overflow: hidden;
     display: block;
     width: 100%;
     height: calc(100% - #{$FOTTER_SIZE} - 2px - 1.5em);
@@ -62,7 +63,7 @@ $FOTTER_SIZE    : 20px;
     height: $FOTTER_SIZE;
     width: 100%;
     #state {
-        display: block;
+        display: inline-block;
         height:100%;
         &_icon{
             display: inline-block;
@@ -88,7 +89,7 @@ import {System} from "../systems"
 import {InvalidIdError} from "../errorHandler"
 
 import Component from "vue-class-component";
-import {Vue,Prop,Emit} from "vue-property-decorator";
+import {Vue,Prop,Emit, Watch} from "vue-property-decorator";
 import NewAtomForm from './addAtom.vue';
 import LoaderView from "./loaderView.vue";
 import HeaderMenu from "./header/header.vue";
@@ -110,13 +111,12 @@ import io from "socket.io-client"
 })
 export default class MainPage extends Vue{
     private system: System | null = null;
+    private socket?: SocketIOClient.Socket;
 
     private newAtomEnable = false;
     private loaderEnable = false;
-
-    //private socket: SocketIOClient.Socket = io.connect("");
-    private socket?: SocketIOClient.Socket;
     private is_server_connected: boolean = false;
+    private server_name: string = "";
 
     private nodes:node[] = [
         {
@@ -170,15 +170,23 @@ export default class MainPage extends Vue{
         super();
     }
 
-    mounted(){
-        this.socket = io();
-        this.socket?.on('connect',()=>{
+    makeSocket(server_name:string){
+
+        let ret = io(server_name);
+
+        ret.on('connect',()=>{
             this.is_server_connected = true;
         })
-        this.socket?.on('disconnect',()=>{
+        ret.on('disconnect',()=>{
             this.is_server_connected = false;
         })
-        this.socket?.on('test1',(data:any)=>{alert("test")})
+        ret.on('test1',(data:any)=>{alert("test")})
+        return ret;
+        
+    }
+
+    mounted(){
+        this.socket = this.makeSocket(this.server_name);
     }
     test2(){
         console.log(this.socket);
@@ -224,6 +232,13 @@ export default class MainPage extends Vue{
     }
     newAtomCancel(){
         this.newAtomEnable = false;
+    }
+
+    @Watch('server_name')
+    changeServerName(newName:string, oldName:string){
+        this.socket?.close();
+
+        this.socket = this.makeSocket(newName);
     }
 }
 </script>
