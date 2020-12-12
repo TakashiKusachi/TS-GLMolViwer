@@ -8,8 +8,10 @@ services:
             - ./nginx_server:/etc/nginx/conf.d:ro
             - front_code:/usr/share/nginx/html
         depends_on: 
+            - front_dev
             - socketserver
         links:
+            - front_dev
             - socketserver
         ports:
             - 8080:80
@@ -18,10 +20,10 @@ services:
 
     socketserver:
         build:
-            context: ./appli_server
+            context: ./backend_socket_server
             dockerfile: Dockerfile
         volumes:
-            - ./appli_server/templates:/templates
+            - ./backend_socket_server/templates:/templates
         environment: 
             CORS_ALLOWED: http://localhost:8080
             HOST: 0.0.0.0
@@ -35,7 +37,8 @@ services:
         build:
             context: ./frontend
         volumes:
-            - front_code:/app/app
+            - front_code:/dist
+        command: /bin/cp -rTf /app/app /dist
 
     
 
@@ -44,7 +47,5 @@ networks:
         driver: bridge
 
 volumes:
-    mysql_volume:
-        driver: local
     front_code:
         driver: local

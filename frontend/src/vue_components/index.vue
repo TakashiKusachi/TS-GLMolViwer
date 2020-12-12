@@ -98,6 +98,7 @@ import Viwer from "./viwer/viwer.vue"
 import {node, submenu_type} from "./header/header_util"
 
 import io from "socket.io-client"
+import axios from "axios"
 
 @Component({
     name: "Index",
@@ -180,7 +181,16 @@ export default class MainPage extends Vue{
         ret.on('disconnect',()=>{
             this.is_server_connected = false;
         })
-        ret.on('test1',(data:any)=>{alert("test")})
+        ret.on('test1',(data:any)=>{
+            console.log("test1 catch") 
+            let recive_message = JSON.parse(data)
+            let state = recive_message.state
+            if(state == "Error"){
+            }
+            else {
+                console.log(recive_message)
+            }
+        })
         return ret;
         
     }
@@ -190,6 +200,17 @@ export default class MainPage extends Vue{
     }
     test2(){
         console.log(this.socket);
+
+        /*
+        let formdata = new FormData();
+        formdata.append('file',JSON.stringify(this.system))
+        axios.post('/apis/relax',formdata,{
+            headers:{
+                'Content-Type': 'multipart/form-data',
+            }
+        })
+        */
+        console.log(JSON.stringify(this.system))
         this.socket?.emit('test2',{'data':'data'})
     }
 

@@ -7,6 +7,7 @@ RUN pip install ase
 ENV CORS_ALLOWED=http://localhost:8081
 ENV HOST=0.0.0.0
 ENV PORT=8888
+ENV UPLOAD_FOLDER=/tmp
 EXPOSE $PORT
 
 COPY ./server.py ./
