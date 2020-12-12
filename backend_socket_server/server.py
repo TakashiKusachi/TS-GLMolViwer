@@ -2,8 +2,9 @@ import os
 
 import ase
 import ase.io
+import ase.db
 
-from flask import Flask, flash, request, render_template
+from flask import Flask, flash, request, render_template,jsonify
 from flask_socketio import SocketIO,emit,send
 
 from werkzeug.utils import secure_filename
@@ -11,6 +12,8 @@ import json
 
 from tempfile import NamedTemporaryFile
 import traceback
+
+import numpy as np
 
 cors_allowed_origins = os.environ["CORS_ALLOWED"]
 host = os.environ["HOST"]
@@ -51,6 +54,32 @@ def relax_calc():
     except RuntimeError as e: 
         app.logger.debug(traceback.format_exc())
         return traceback.format_exc()
+
+@app.route('/apis/db/list',methods=['GET'])
+def listup():
+    db = ase.db.connect("/db.json")
+
+    return jsonify({
+        'dataset':[
+            {
+            'id': row.id,
+            'unique_id':row.unique_id,
+            'name':row.name,
+            }
+            for row in db.select()
+        ]})
+
+@app.route('/apis/db/data',methods=['GET'])
+def db_data():
+    db = ase.db.connect("/db.json")
+    unique_id = request.args.get('unique_id')
+    atoms = db.get("unique_id={}".format(unique_id))
+
+    retdict = {
+        key:atoms[key] for key in atoms if not isinstance(atoms[key],np.ndarray)
+    }
+    retdict.update({'positions':atoms['positions'].tolist()})
+    return jsonify(retdict)
 
 
 

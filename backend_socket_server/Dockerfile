@@ -10,6 +10,9 @@ ENV PORT=8888
 ENV UPLOAD_FOLDER=/tmp
 EXPOSE $PORT
 
+COPY ./startup/startup.py ./
+RUN python -u /startup.py
+
 COPY ./server.py ./
 
 CMD ["python","-u","./server.py"]

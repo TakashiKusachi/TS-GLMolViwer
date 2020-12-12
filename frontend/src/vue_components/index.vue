@@ -3,6 +3,7 @@
         <loader-view :enable="loaderEnable"></loader-view>
         <new-atom-form :enable="newAtomEnable" @submit="newAtomSubmit" @cancel="newAtomCancel"></new-atom-form>
         <header-menu :nodes="nodes"></header-menu>
+        <example-viwe :dataset="example_dataset"></example-viwe>
         <div id="main-contents">
             <div id="main-contents-left"><viwer id="view-area" :system="system" @busy="showLoaderView" @ready="hideLoaderView"></viwer></div>
             <div id="main-contents-right"><propaties :system="system"></propaties></div>
@@ -95,6 +96,7 @@ import LoaderView from "./loaderView.vue";
 import HeaderMenu from "./header/header.vue";
 import Propaties from "./propaties/index.vue"
 import Viwer from "./viwer/viwer.vue"
+import ExampleViwe from "./Example_viwe/example_viwe.vue"
 import {node, submenu_type} from "./header/header_util"
 
 import io from "socket.io-client"
@@ -105,6 +107,7 @@ import axios from "axios"
     components:{
         NewAtomForm,
         LoaderView,
+        ExampleViwe,
         HeaderMenu,
         Viwer,
         Propaties,
@@ -118,6 +121,8 @@ export default class MainPage extends Vue{
     private loaderEnable = false;
     private is_server_connected: boolean = false;
     private server_name: string = "";
+
+    private example_dataset:any = null;
 
     private nodes:node[] = [
         {
@@ -162,6 +167,17 @@ export default class MainPage extends Vue{
                     type:submenu_type.BUTTON,
                     cb_click:this.test2,
                 }
+            ]
+        },
+        {
+            text:"Example",
+            type:submenu_type.PARENT,
+            childs:[
+                {
+                    text:"Online",
+                    type:submenu_type.BUTTON,
+                    cb_click:this.online_example,
+                },
             ]
         },
     ]
@@ -210,7 +226,8 @@ export default class MainPage extends Vue{
             }
         })
         */
-        console.log(JSON.stringify(this.system))
+        //console.log(JSON.stringify(this.system))
+
         this.socket?.emit('test2',{'data':'data'})
     }
 
@@ -253,6 +270,18 @@ export default class MainPage extends Vue{
     }
     newAtomCancel(){
         this.newAtomEnable = false;
+    }
+
+    online_example(){
+        axios.get('/apis/db/list').then((value)=>{
+            this.example_dataset=value.data.dataset
+            console.log(value)
+            return axios.get('/apis/db/data',{
+                params:{
+                    unique_id: value.data.dataset[0].unique_id
+                }
+            })
+        })
     }
 
     @Watch('server_name')
