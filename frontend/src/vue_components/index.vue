@@ -3,7 +3,7 @@
         <loader-view :enable="loaderEnable"></loader-view>
         <new-atom-form :enable="newAtomEnable" @submit="newAtomSubmit" @cancel="newAtomCancel"></new-atom-form>
         <header-menu :nodes="nodes"></header-menu>
-        <example-viwe :dataset="example_dataset"></example-viwe>
+        <example-viwe :dataset="example_dataset" @select_id="load_model"></example-viwe>
         <div id="main-contents">
             <div id="main-contents-left"><viwer id="view-area" :system="system" @busy="showLoaderView" @ready="hideLoaderView"></viwer></div>
             <div id="main-contents-right"><propaties :system="system"></propaties></div>
@@ -274,13 +274,20 @@ export default class MainPage extends Vue{
 
     online_example(){
         axios.get('/apis/db/list').then((value)=>{
-            this.example_dataset=value.data.dataset
-            console.log(value)
-            return axios.get('/apis/db/data',{
-                params:{
-                    unique_id: value.data.dataset[0].unique_id
-                }
-            })
+            this.example_dataset=value.data.dataset;
+        })
+    }
+
+    load_model(unique_id:string){
+        if(unique_id === ""){
+            return;
+        }
+        axios.get('/apis/db/data',{
+            params:{
+                unique_id: unique_id
+            }
+        }).then((response)=>{
+            console.log(response)
         })
     }
 

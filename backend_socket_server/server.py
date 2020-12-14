@@ -24,7 +24,6 @@ upload_folder = os.environ["UPLOAD_FOLDER"]
 
 app = Flask(__name__)
 app.config['SECRET_KEY']='secret!'
-#socketio = SocketIO(app,async_mode=None,cors_allowed_origins=[cors_allowed_origins])
 socketio = SocketIO(app,async_mode=None,cors_allowed_origins=parse_cors_allowd(cors_allowed_origins))
 
 @app.route('/')

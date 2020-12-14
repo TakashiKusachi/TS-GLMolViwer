@@ -1,12 +1,14 @@
 <template>
-    <div id="view" class="hidden">
+    <div id="view" v-bind:class="{hidden:is_hidden}">
         <div id="view-main">
-            <ul>
-                <li v-for="item in dataset" :key="item.id">
-                    {{item.name}}
-                </li>
-            </ul>
+            <table>
+                <tr v-for="item in dataset" :key="item.id" @click="select_click(item.id)" v-bind:class="{checked: is_selected(item.id)}">
+                    <td>{{item.name}}</td>
+                </tr>
+            </table>
         </div>
+        <p>{{textarea}}</p>
+        <input type="button" value="OK" @click="selectId"><input type="button" value="Cancel" @click="click_cancel"/>
     </div>
 </template>
 
@@ -14,27 +16,68 @@
 div#view {
     float: left;
     position: absolute;
-    top: 50vh;
-    left: 50vw;
+    top: 100vh / 2 - 25vh;
+    height: 50vh;
+    left: 100vw / 2 - 25vw;
+    width: 50vw;
     background-color: white;
-    border: black;
-    height: 100px;
-    width: 100px;
+    border: 3px outset gray;
+    div{
+        float:none;
+        position:relative;
+
+        &#view-main {
+            height : 50%;
+            table{
+                height: 100%;
+                display: block;
+                overflow-y: scroll;
+                border-collapse: collapse;
+                tr{
+                    display: block;
+                    background-color: white;
+                    width: 100%;
+                    td{
+                        display: block;
+                        border-color: 1px solid black;
+                    }
+                }
+                tr.checked{
+                    background-color: yellowgreen;
+                }
+                tr:hover{
+                    background-color: silver;
+                }
+
+            }
+        }
+    }
+    p{
+        display: block;
+        width: 98%;
+        height: 20%;
+        margin: 1em auto 0px;
+        border: 1px solid gray;
+        overflow-y: scroll;
+    }
 }
 
-div#view-main {
-    height : 80%;
-
-}
 .hidden{
     display: none;
 }
+
 </style>
 
 <script lang="ts">
 
 import Component from "vue-class-component";
 import {Vue,Prop,Emit, Watch} from "vue-property-decorator";
+
+type datalist={
+    id:number,
+    name:string,
+    unique_id:string,
+}
 
 @Component({
     name: "example_viwe",
@@ -43,10 +86,45 @@ import {Vue,Prop,Emit, Watch} from "vue-property-decorator";
 })
 export default class example_viwe extends Vue{
     @Prop()
-    private dataset:any = null;
+    private dataset:datalist[] | null = null;
+
+    private is_hidden:boolean = true
+    private selected:number | null = null;
+    private textarea:string= "";
 
     constructor(){
         super();
+    }
+
+    @Watch("dataset")
+    chande_dataset(newData:datalist[], oldData:datalist[]){
+        this.is_hidden = false;
+    }
+
+    click_cancel(){
+        this.is_hidden = true;
+    }
+
+    is_selected(id:number){
+        return this.selected === id;
+    }
+
+    select_click(id:number){
+        this.selected = id;
+    }
+
+    @Emit('select_id')
+    selectId(){
+        if (this.dataset === null || this.dataset.length == 0){
+            console.log("dataset is empty")
+            return "";
+        }
+        let query = this.dataset.find((item:datalist) => {return item.id==this.selected});
+        if (query === undefined){
+            console.log("not query")
+            return "";
+        }
+        return query.unique_id;
     }
 
 }
