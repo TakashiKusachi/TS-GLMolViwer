@@ -101,6 +101,7 @@ import {node, submenu_type} from "./header/header_util"
 
 import io from "socket.io-client"
 import axios from "axios"
+import { BondType } from "../systems/system"
 
 @Component({
     name: "Index",
@@ -123,6 +124,8 @@ export default class MainPage extends Vue{
     private server_name: string = "";
 
     private example_dataset:any = null;
+
+    private bond_threshold:number = 1.6;
 
     private nodes:node[] = [
         {
@@ -166,7 +169,12 @@ export default class MainPage extends Vue{
                     text:"Optim",
                     type:submenu_type.BUTTON,
                     cb_click:this.test2,
-                }
+                },
+                {
+                    text:"BondCalc",
+                    type:submenu_type.BUTTON,
+                    cb_click:this.bondCalc,
+                },
             ]
         },
         {
@@ -296,6 +304,27 @@ export default class MainPage extends Vue{
             }
             this.system = system
         })
+    }
+
+    bondCalc(){
+        let system = System.getSystem(this.system as System);
+        let natoms = system.natoms;
+        for(let i=0;i < natoms;i++){
+            for (let j=i+1;j < natoms;j++){
+                let atoma = system.getAtom(i);
+                let atomb = system.getAtom(j);
+                
+                let dist = Math.sqrt(
+                    Math.pow(atoma.position[0] - atomb.position[0],2) +
+                    Math.pow(atoma.position[1] - atomb.position[1],2) +
+                    Math.pow(atoma.position[2] - atomb.position[2],2)
+                )
+                if(dist < this.bond_threshold){
+                    system.add_bond(atoma.name,atomb.name,BondType.Single);
+                }
+            }
+        }
+        this.system= system;
     }
 
     @Watch('server_name')
