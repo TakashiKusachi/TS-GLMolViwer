@@ -10,7 +10,7 @@ export const default_colors:Array<number> = [
     /*  B  */0xffffff,
     /*  C  */0x505050,
     /*  N  */0xffffff,
-    /*  O  */0xffffff,
+    /*  O  */0xff0000,
     /*  F  */0xffffff,
     /*  Ne */0xffffff,
 ]
