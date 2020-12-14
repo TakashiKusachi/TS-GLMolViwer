@@ -12,7 +12,7 @@ def startup():
         try:
             atoms = molecule(name)
             atoms.calc = EMT()
-            BFGS(atoms).run(fmax=0.01)
+            #BFGS(atoms).run(fmax=0.01)
             db.write(atoms,releaxed=True,name=name)
         except NotImplementedError as e:
             pass
