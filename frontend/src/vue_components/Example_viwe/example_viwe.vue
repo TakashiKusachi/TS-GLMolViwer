@@ -77,6 +77,7 @@ type datalist={
     id:number,
     name:string,
     unique_id:string,
+    description:string,
 }
 
 @Component({
@@ -111,6 +112,16 @@ export default class example_viwe extends Vue{
 
     select_click(id:number){
         this.selected = id;
+        if (this.dataset === null || this.dataset.length == 0){
+            console.log("dataset is empty")
+            return "";
+        }
+        let query = this.dataset.find((item:datalist) => {return item.id==this.selected});
+        if (query === undefined){
+            console.log("not query")
+            return "";
+        }
+        this.textarea = query.description
     }
 
     @Emit('select_id')

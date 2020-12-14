@@ -44,10 +44,6 @@ def relax_calc():
         if file.filename == '':
             raise RuntimeError("filename is null")
 
-        #filename = secure_filename(file.filename)
-        #app.logger.debug("recive file "+filename)
-        #file.save(os.path.join(upload_folder,filename))
-
         atoms = ase.io.read(file)
         app.logger.debug("# of atoms"+str(len(atoms)))
 
@@ -60,6 +56,7 @@ def relax_calc():
 @app.route('/apis/db/list',methods=['GET'])
 def listup():
     db = ase.db.connect("/db.json")
+    
 
     return jsonify({
         'dataset':[
@@ -67,6 +64,7 @@ def listup():
             'id': row.id,
             'unique_id':row.unique_id,
             'name':row.name,
+            'description': row.data['description'],
             }
             for row in db.select()
         ]})
@@ -82,6 +80,8 @@ def db_data():
     }
     retdict.update({'positions':atoms['positions'].tolist()})
     retdict.update({'numbers':atoms['numbers'].tolist()})
+    retdict.update({'data':atoms['data'] if atoms.get('data')!=None else ""})
+
     return jsonify(retdict)
 
 

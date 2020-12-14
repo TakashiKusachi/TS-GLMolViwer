@@ -12,8 +12,7 @@ def startup():
         try:
             atoms = molecule(name)
             atoms.calc = EMT()
-            #BFGS(atoms).run(fmax=0.01)
-            db.write(atoms,releaxed=True,name=name)
+            db.write(atoms,releaxed=True,name=name,data={'description':'ASE sample data.'})
         except NotImplementedError as e:
             pass
 
