@@ -81,6 +81,7 @@ def db_data():
         key:atoms[key] for key in atoms if not isinstance(atoms[key],np.ndarray)
     }
     retdict.update({'positions':atoms['positions'].tolist()})
+    retdict.update({'numbers':atoms['numbers'].tolist()})
     return jsonify(retdict)
 
 

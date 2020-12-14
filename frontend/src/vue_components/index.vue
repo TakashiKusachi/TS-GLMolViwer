@@ -288,6 +288,13 @@ export default class MainPage extends Vue{
             }
         }).then((response)=>{
             console.log(response)
+            let numbers = response.data.numbers  
+            let positions = response.data.positions
+            let system = new System();
+            for(let i = 0;i < numbers.length;i++){
+                system.add_atom(`Atom${i}`,positions[i],numbers[i])
+            }
+            this.system = system
         })
     }
 

@@ -124,6 +124,7 @@ export default class example_viwe extends Vue{
             console.log("not query")
             return "";
         }
+        this.is_hidden = true;
         return query.unique_id;
     }
 
