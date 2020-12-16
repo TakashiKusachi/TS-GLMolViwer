@@ -284,7 +284,7 @@ export default class MainPage extends Vue{
         axios.get('/apis/db/list').then((value)=>{
             this.example_dataset=value.data.dataset;
         }).catch((error)=>{
-            
+
         })
     }
 
@@ -309,7 +309,6 @@ export default class MainPage extends Vue{
     }
 
     bondCalc(){
-        //let system = System.getSystem(this.system as System);
         if (this.system == null){
             return;
         }
