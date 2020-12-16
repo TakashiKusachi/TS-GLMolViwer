@@ -48,7 +48,7 @@ div#view {
                 tr:hover{
                     background-color: silver;
                 }
-                tr:checked:hover{
+                tr.checked:hover{
                     background-color: gray;
                 }
 
