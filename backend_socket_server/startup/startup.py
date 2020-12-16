@@ -5,8 +5,8 @@ from ase.optimize import BFGS
 from ase.collections import g2
 from ase.build import molecule
 
-def startup():
-    db = connect("/db.json")
+def up_initial_dataset(db_url):
+    db = connect(db_url)
 
     for name in g2.names:
         try:

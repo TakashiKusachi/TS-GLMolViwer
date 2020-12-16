@@ -16,11 +16,13 @@ import traceback
 import numpy as np
 
 from utils import parse_cors_allowd
+from startup import up_initial_dataset
 
 cors_allowed_origins = os.environ["CORS_ALLOWED"]
 host = os.environ["HOST"]
 port = int(os.environ['PORT'])
 upload_folder = os.environ["UPLOAD_FOLDER"]
+db_server_url = os.environ["DB_SERVER_URL"]
 
 app = Flask(__name__)
 app.config['SECRET_KEY']='secret!'
@@ -55,7 +57,7 @@ def relax_calc():
 
 @app.route('/apis/db/list',methods=['GET'])
 def listup():
-    db = ase.db.connect("/db.json")
+    db = ase.db.connect(db_server_url)
     
 
     return jsonify({
@@ -71,7 +73,7 @@ def listup():
 
 @app.route('/apis/db/data',methods=['GET'])
 def db_data():
-    db = ase.db.connect("/db.json")
+    db = ase.db.connect(db_server_url)
     unique_id = request.args.get('unique_id')
     atoms = db.get("unique_id={}".format(unique_id))
 
@@ -106,4 +108,5 @@ def connect():
 
 if __name__=='__main__':
     print("server up")
+    up_initial_dataset(db_server_url)
     socketio.run(app,debug=True,host=host,port=port)
