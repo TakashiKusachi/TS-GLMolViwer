@@ -283,6 +283,8 @@ export default class MainPage extends Vue{
     online_example(){
         axios.get('/apis/db/list').then((value)=>{
             this.example_dataset=value.data.dataset;
+        }).catch((error)=>{
+            
         })
     }
 
@@ -307,7 +309,14 @@ export default class MainPage extends Vue{
     }
 
     bondCalc(){
-        let system = System.getSystem(this.system as System);
+        //let system = System.getSystem(this.system as System);
+        if (this.system == null){
+            return;
+        }
+        let system = new System()
+        for (let atom of this.system.getAtoms()){
+            system.add_atom(atom.name,atom.position,atom.element);
+        }
         let natoms = system.natoms;
         for(let i=0;i < natoms;i++){
             for (let j=i+1;j < natoms;j++){
