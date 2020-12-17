@@ -26,17 +26,46 @@ services:
             CORS_ALLOWED: "*"
             HOST: 0.0.0.0
             PORT: ${API_SERVER_PORT}
-            DB_SERVER_URL: "/db.json"
+            DB_SERVER_URL: "mysql://${DB_USER_NAME}:${DB_USER_PASSWORD}@db:${DB_SQL_PORT}/ase_database"
         expose:
             - ${API_SERVER_PORT}
+        depends_on: 
+            - db
+
 
     front_dev:
         build:
             context: ./frontend
         volumes:
             - front_code:/dist
-        command: /bin/cp -rTf /app/app /dist
+        command: /bin/cp -rTf /app/app /dist 
+    
+    db:
+        image: mysql:5.7
+        container_name: "ase_database"
+        environment:
+            MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+            MYSQL_DATABASE: ase_database
+            MYSQL_USER: ${DB_USER_NAME}
+            MYSQL_PASSWORD: ${DB_USER_PASSWORD}
+        volumes:
+            - ./db/data:/var/lib/mysql
+        expose:
+            - ${DB_SQL_PORT}
+
+    phpmyadmin:
+        image: phpmyadmin/phpmyadmin
+        environment:
+            - PMA_ARBITRARY=1
+            - PMA_HOSTS=db
+            - PMA_USER=root
+            - PMA_PASSWORD=${DB_ROOT_PASSWORD}
+        ports:
+            - 8081:80
 
 volumes:
     front_code:
-        driver: local
+        driver_opts: 
+            type: none
+            device: ./frontend/app
+            o: bind

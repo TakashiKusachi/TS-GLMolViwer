@@ -1,5 +1,5 @@
 node_modules
 .vscode
 
-docker-compose.pre-deploy.yml
-docker-compose.deploy.yml
+utils
+db/data
