@@ -5,6 +5,7 @@ import ase.io
 import ase.db
 
 from flask import Flask, flash, request, render_template,jsonify
+from pymysql.err import OperationalError
 from flask_socketio import SocketIO,emit,send
 
 from werkzeug.utils import secure_filename
@@ -57,19 +58,23 @@ def relax_calc():
 
 @app.route('/apis/db/list',methods=['GET'])
 def listup():
-    db = ase.db.connect(db_server_url)
-    
-
-    return jsonify({
-        'dataset':[
-            {
-            'id': row.id,
-            'unique_id':row.unique_id,
-            'name':row.name,
-            'description': row.data['description'],
-            }
-            for row in db.select()
-        ]})
+    if request.method == "GET":
+        try:
+            db = ase.db.connect(db_server_url)
+        
+            return jsonify({
+                'dataset':[
+                    {
+                    'id': row.id,
+                    'unique_id':row.unique_id,
+                    'name':row.name,
+                    'description': row.data['description'],
+                    }
+                    for row in db.select()
+                ]})
+        except OperationalError as e:
+            app.logger.debug("{} is down".format(db_server_url))
+            return "",503
 
 @app.route('/apis/db/data',methods=['GET'])
 def db_data():
@@ -85,8 +90,6 @@ def db_data():
     retdict.update({'data':atoms['data'] if atoms.get('data')!=None else ""})
 
     return jsonify(retdict)
-
-
 
 @socketio.on('test2')
 def test2(data):
@@ -107,6 +110,6 @@ def connect():
     return True
 
 if __name__=='__main__':
-    print("server up")
+    app.logger.debug("server up")
     up_initial_dataset(db_server_url)
     socketio.run(app,debug=True,host=host,port=port)

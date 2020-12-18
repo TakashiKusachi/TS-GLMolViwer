@@ -10,11 +10,10 @@ import time
 from pymysql.err import OperationalError
 
 def up_initial_dataset(db_url):
-    db = connect(db_url)
-
     count = 0
     while():
         try:
+            db = connect(db_url)
             l = len(db)
             if (l != 0):
                 return
@@ -29,6 +28,7 @@ def up_initial_dataset(db_url):
     count = 0
     for name in g2.names:
         try:
+            db = connect(db_url)
             atoms = molecule(name)
             atoms.calc = EMT()
             db.write(atoms,releaxed=True,name=name,data={'description':'ASE sample data.'})
@@ -37,8 +37,8 @@ def up_initial_dataset(db_url):
         except OperationalError as e:
             count+=1
             time.sleep(3.0)
-            if(count>3):
-                raise RuntimeError()
+            if(count>10):
+                raise RuntimeError("Connection refused: URL={url}".format(url=db_url))
             continue
 
 if __name__=="__main__":

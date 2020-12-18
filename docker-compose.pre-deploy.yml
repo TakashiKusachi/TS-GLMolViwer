@@ -49,7 +49,7 @@ services:
             MYSQL_USER: ${DB_USER_NAME}
             MYSQL_PASSWORD: ${DB_USER_PASSWORD}
         volumes:
-            - ./db/data:/var/lib/mysql
+            - database:/var/lib/mysql
         expose:
             - ${DB_SQL_PORT}
 
@@ -69,3 +69,6 @@ volumes:
             type: none
             device: ./frontend/app
             o: bind
+
+    database:
+        driver: local
