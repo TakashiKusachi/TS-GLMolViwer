@@ -97,7 +97,7 @@ import HeaderMenu from "./header/header.vue";
 import Propaties from "./propaties/index.vue"
 import Viwer from "./viwer/viwer.vue"
 import ExampleViwe from "./Example_viwe/example_viwe.vue"
-import {node, submenu_type} from "./header/header_util"
+import {node, parent_position, submenu_type} from "./header/header_util"
 
 import io from "socket.io-client"
 import axios from "axios"
@@ -116,16 +116,18 @@ import { BondType } from "../systems/system"
 })
 export default class MainPage extends Vue{
     private system: System | null = null;
-    private socket?: SocketIOClient.Socket;
 
     private newAtomEnable = false;
     private loaderEnable = false;
-    private is_server_connected: boolean = false;
-    private server_name: string = "";
 
     private example_dataset:any = null;
 
     private bond_threshold:number = 1.6;
+
+    private timer:number = 0;
+    private is_server_connected: boolean = false;
+    private server_name: string = "";
+    private user_name: string = "";
 
     private nodes:node[] = [
         {
@@ -166,11 +168,6 @@ export default class MainPage extends Vue{
                     cb_click:this.showNewAtomForm,
                 },
                 {
-                    text:"Optim",
-                    type:submenu_type.BUTTON,
-                    cb_click:this.test2,
-                },
-                {
                     text:"BondCalc",
                     type:submenu_type.BUTTON,
                     cb_click:this.bondCalc,
@@ -188,6 +185,32 @@ export default class MainPage extends Vue{
                 },
             ]
         },
+        {
+            text:this.user_name,
+            type:submenu_type.PARENT,
+            position: parent_position.RIGHT,
+            childs:[
+                {
+                    text:"addUser",
+                    type:submenu_type.BUTTON,
+                    cb_click:()=>{
+                        axios({
+                            method: "post",
+                            url: '/apis/user',
+                            timeout: 1000,
+                            params:{
+                                name:"test",
+                                pwd:"testpwd"
+                            }
+                        }).then(()=>{
+                            console.log("test ok")
+                        }).catch(()=>{
+                            console.log("test no")
+                        })
+                    }
+                },
+            ]
+        },
     ]
 
 
@@ -195,48 +218,23 @@ export default class MainPage extends Vue{
         super();
     }
 
-    makeSocket(server_name:string){
-
-        let ret = io(server_name);
-
-        ret.on('connect',()=>{
-            this.is_server_connected = true;
-        })
-        ret.on('disconnect',()=>{
-            this.is_server_connected = false;
-        })
-        ret.on('test1',(data:any)=>{
-            console.log("test1 catch") 
-            let recive_message = JSON.parse(data)
-            let state = recive_message.state
-            if(state == "Error"){
-            }
-            else {
-                console.log(recive_message)
-            }
-        })
-        return ret;
-        
-    }
-
     mounted(){
-        this.socket = this.makeSocket(this.server_name);
-    }
-    test2(){
-        console.log(this.socket);
-
-        /*
-        let formdata = new FormData();
-        formdata.append('file',JSON.stringify(this.system))
-        axios.post('/apis/relax',formdata,{
-            headers:{
-                'Content-Type': 'multipart/form-data',
-            }
-        })
-        */
-        //console.log(JSON.stringify(this.system))
-
-        this.socket?.emit('test2',{'data':'data'})
+        /** 活線確認 *
+         * 
+         * 3秒ごとにサーバ情報を取得。
+         * 1秒以上レスポンスが帰ってこない場合は、サーバがダウンしているものとしている。
+         */
+        this.timer = window.setInterval(()=>{
+            axios({
+                method: "get",
+                url: '/apis/server/info',
+                timeout: 1000
+            }).then((response)=>{
+                this.is_server_connected = true;
+            }).catch(()=>{
+                this.is_server_connected = false;
+            })
+        },3000)
     }
 
     New(e:Event){
@@ -246,7 +244,7 @@ export default class MainPage extends Vue{
     openFile(e:Event){
         console.info("HeaderMenu openFileEvent")
         let target = e.target as HTMLInputElement;
-        let files = target.files as FileList;
+        let files =  target.files as FileList;
         this.showLoaderView();
 
         let parser = new AtomicsParsers();
@@ -333,13 +331,6 @@ export default class MainPage extends Vue{
             }
         }
         this.system= system;
-    }
-
-    @Watch('server_name')
-    changeServerName(newName:string, oldName:string){
-        this.socket?.close();
-
-        this.socket = this.makeSocket(newName);
     }
 }
 </script>

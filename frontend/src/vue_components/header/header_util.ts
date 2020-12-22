@@ -4,8 +4,14 @@ export enum submenu_type{
     FILE,
 }
 
+export enum parent_position{
+    LEFT,
+    RIGHT,
+}
+
 type base_node ={
     type: submenu_type;
+    position?: parent_position;
 }
 
 type node_parent = base_node &{

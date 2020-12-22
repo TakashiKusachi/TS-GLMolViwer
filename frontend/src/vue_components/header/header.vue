@@ -1,24 +1,17 @@
 <template>
     <header id="header-contents">
-        <ul class="header_single">
-            <header-main-menu v-for="rootmenu in nodes" :key="rootmenu.text" :root="rootmenu"></header-main-menu>
-        </ul>
+        <header-main-menu v-for="rootmenu in nodes" :key="rootmenu.text" :root="rootmenu"></header-main-menu>
     </header>
 </template>
 
 <style lang="scss" scoped>
 
 #header-contents {
-    height: 1.5em;
-}
-
-ul.header_single {
-    display: flex;
-    height: 100%;
     background-color: dimgray;
     list-style: none;
-    border-left: 1px solid black;
+    border-bottom: 1px solid black;
 }
+
 </style>
 
 <script lang="ts">

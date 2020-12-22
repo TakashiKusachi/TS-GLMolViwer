@@ -1,3 +1,5 @@
+import os
+
 import ase
 from ase.db import connect
 from ase.calculators.emt import EMT
@@ -8,6 +10,8 @@ from ase.build import molecule
 import time
 
 from pymysql.err import OperationalError
+
+db_server_url = os.environ["DB_SERVER_URL"]
 
 def up_initial_dataset(db_url):
     count = 0
@@ -42,4 +46,4 @@ def up_initial_dataset(db_url):
             continue
 
 if __name__=="__main__":
-    up_initial_dataset()
+    up_initial_dataset(db_server_url)
