@@ -2,7 +2,7 @@
     <div id="vueapp">
         <loader-view :enable="loaderEnable"></loader-view>
         <new-atom-form :enable="newAtomEnable" @submit="newAtomSubmit" @cancel="newAtomCancel"></new-atom-form>
-        <header-menu :nodes="nodes"></header-menu>
+        <header-menu :nodes="nodes" :user="user"></header-menu>
         <example-viwe :dataset="example_dataset" @select_id="load_model"></example-viwe>
         <div id="main-contents">
             <div id="main-contents-left"><viwer id="view-area" :system="system" @busy="showLoaderView" @ready="hideLoaderView"></viwer></div>
@@ -93,7 +93,7 @@ import Component from "vue-class-component";
 import {Vue,Prop,Emit, Watch} from "vue-property-decorator";
 import NewAtomForm from './addAtom.vue';
 import LoaderView from "./loaderView.vue";
-import HeaderMenu from "./header/header.vue";
+import HeaderMenu,{user_model} from "./header/header.vue";
 import Propaties from "./propaties/index.vue"
 import Viwer from "./viwer/viwer.vue"
 import ExampleViwe from "./Example_viwe/example_viwe.vue"
@@ -127,22 +127,25 @@ export default class MainPage extends Vue{
     private timer:number = 0;
     private is_server_connected: boolean = false;
     private server_name: string = "";
-    private user_name: string = "";
+    private user:user_model;
 
     private nodes:node[] = [
         {
             text:"File",
             type: submenu_type.PARENT,
+            disable: true,
             childs:[
                 {
                     text:"New",
                     type:submenu_type.BUTTON,
+                    disable: true,
                     cb_click:this.New,
                 },
                 {
                     text:"OpenFile",
                     type:submenu_type.FILE,
                     multiple:true,
+                    disable: true,
                     cb_change:this.openFile,
                 }
             ]
@@ -150,10 +153,12 @@ export default class MainPage extends Vue{
         {
             text:"Viewer",
             type:submenu_type.PARENT,
+            disable: true,
             childs:[
                 {
                     text:"BackGraund",
                     type:submenu_type.BUTTON,
+                    disable: true,
                     cb_click:(e)=>{},
                 }
             ]
@@ -161,15 +166,18 @@ export default class MainPage extends Vue{
         {
             text:"Edit",
             type:submenu_type.PARENT,
+            disable: true,
             childs:[
                 {
                     text:"NewAtom",
                     type:submenu_type.BUTTON,
+                    disable: true,
                     cb_click:this.showNewAtomForm,
                 },
                 {
                     text:"BondCalc",
                     type:submenu_type.BUTTON,
+                    disable: true,
                     cb_click:this.bondCalc,
                 },
             ]
@@ -177,37 +185,13 @@ export default class MainPage extends Vue{
         {
             text:"Example",
             type:submenu_type.PARENT,
+            disable: true,
             childs:[
                 {
                     text:"Online",
                     type:submenu_type.BUTTON,
+                    disable: true,
                     cb_click:this.online_example,
-                },
-            ]
-        },
-        {
-            text:this.user_name,
-            type:submenu_type.PARENT,
-            position: parent_position.RIGHT,
-            childs:[
-                {
-                    text:"addUser",
-                    type:submenu_type.BUTTON,
-                    cb_click:()=>{
-                        axios({
-                            method: "post",
-                            url: '/apis/user',
-                            timeout: 1000,
-                            params:{
-                                name:"test",
-                                pwd:"testpwd"
-                            }
-                        }).then(()=>{
-                            console.log("test ok")
-                        }).catch(()=>{
-                            console.log("test no")
-                        })
-                    }
                 },
             ]
         },
@@ -216,6 +200,10 @@ export default class MainPage extends Vue{
 
     constructor(){
         super();
+        this.user = {
+            name: "",
+            id: "",
+        }
     }
 
     mounted(){

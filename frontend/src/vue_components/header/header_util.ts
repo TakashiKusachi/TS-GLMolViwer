@@ -12,6 +12,7 @@ export enum parent_position{
 type base_node ={
     type: submenu_type;
     position?: parent_position;
+    disable: boolean;
 }
 
 type node_parent = base_node &{

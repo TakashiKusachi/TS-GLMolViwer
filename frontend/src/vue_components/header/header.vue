@@ -1,5 +1,6 @@
 <template>
     <header id="header-contents">
+        <header-user-menu :user="user"></header-user-menu>
         <header-main-menu v-for="rootmenu in nodes" :key="rootmenu.text" :root="rootmenu"></header-main-menu>
     </header>
 </template>
@@ -19,14 +20,22 @@ import Component from "vue-class-component";
 import {Vue,Prop,Emit} from "vue-property-decorator";
 import {node, submenu_type} from "./header_util"
 import HeaderMainMenu from "./header_mainmenu.vue"
+import HeaderUserMenu,{user_model} from "./header_user_menu.vue"
+
+export {user_model}
 
 @Component({
     name: "HeaderMenu",
     components:{
         HeaderMainMenu,
+        HeaderUserMenu,
     }
 })
 export default class HeaderMenu extends Vue{
+
+    @Prop()
+    private user!:user_model;
+
     constructor(){
         super();
     }
