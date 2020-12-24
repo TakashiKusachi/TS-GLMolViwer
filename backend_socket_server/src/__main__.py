@@ -2,6 +2,8 @@ from fastapi import FastAPI,HTTPException,Cookie
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
 
+import logging
+
 from typing import Optional
 
 from pymysql.err import OperationalError
@@ -15,14 +17,15 @@ from .model import Base,engine,session
 from .model.user import User,PostUserModel
 from .startup import up_initial_dataset
 
-app = FastAPI()
+app = FastAPI(debug=True)
 Base.metadata.create_all(bind=engine)
+logger = logging.getLogger("uvicorn")
 
 @app.on_event("startup")
 async def startup_event():
     up_initial_dataset(db_server_url)
 
-@app.get('/apis/server/info')
+@app.get('/apis/server/info',)
 async def serverInfo():
     return JSONResponse(content=jsonable_encoder(
         {
@@ -72,11 +75,11 @@ async def listup( user_id:Optional[str] = Cookie(None)):
                 'name':row.name,
                 'description': row.data['description'],
                 }
-                for row in db.select()
+                for row in db.select(columns=["id","unique_id","key_value_pairs","data"])
             ]}
         ))
     except OperationalError as e:
-        app.logger.debug("{} is down".format(db_server_url))
+        logger.debug("{} is down".format(db_server_url))
         return "",503
 
 @app.get('/apis/db/data')

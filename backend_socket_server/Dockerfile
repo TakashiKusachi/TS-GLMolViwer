@@ -15,9 +15,10 @@ ENV PORT=8888
 ENV UPLOAD_FOLDER=/tmp
 ENV DB_SERVER_URL="/db.json"
 ENV COOKIE_TIME=3600
+ENV LOG_LEVEL=info
 EXPOSE $PORT
 
 COPY ./src/ ./src/
 COPY ./server.py ./
 
-CMD uvicorn --host ${HOST} --port ${PORT} server:app
+CMD uvicorn --host ${HOST} --port ${PORT} --log-level ${LOG_LEVEL} server:app

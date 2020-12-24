@@ -8,28 +8,32 @@ from ase.collections import g2
 from ase.build import molecule
 
 import time
+import logging
 
-from pymysql.err import OperationalError
+from sqlalchemy.exc import OperationalError
 
-db_server_url = os.environ["DB_SERVER_URL"]
+logger = logging.getLogger('uvicorn')
 
 def up_initial_dataset(db_url):
+    length = 0
     count = 0
-    while():
+    while(True):
         try:
             db = connect(db_url)
-            l = len(db)
-            if (l != 0):
-                return
+            length = len(db)
         except OperationalError as e:
             count += 1
+            logger.info("OperationalError {}".format(count))
             if(count == 3):
-                raise RuntimeError()
+                raise RuntimeError("Connection refused: URL={url}".format(url=db_url))
             pass
         else:
             break
 
     count = 0
+    logger.info("wakeup data length: {}".format(length))
+    if length != 0:
+        return
     for name in g2.names:
         try:
             db = connect(db_url)
@@ -46,4 +50,4 @@ def up_initial_dataset(db_url):
             continue
 
 if __name__=="__main__":
-    up_initial_dataset(db_server_url)
+    pass

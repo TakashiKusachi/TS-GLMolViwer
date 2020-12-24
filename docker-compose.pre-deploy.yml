@@ -50,6 +50,8 @@ services:
             MYSQL_PASSWORD: ${DB_USER_PASSWORD}
         volumes:
             - database:/var/lib/mysql
+            - ./db/conf.d/:/etc/mysql/conf.d/
+            - database_log:/var/log/mysql/
         expose:
             - ${DB_SQL_PORT}
 
@@ -71,4 +73,7 @@ volumes:
             o: bind
 
     database:
+        driver: local
+
+    database_log:
         driver: local
