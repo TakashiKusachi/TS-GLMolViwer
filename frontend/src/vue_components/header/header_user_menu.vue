@@ -4,6 +4,7 @@
         <ul class="right_side">
             <header-sub-menu v-for="submenu in filltedNode" :key="submenu.text" :root="submenu" ></header-sub-menu>
         </ul>
+        <user-form :enable="form_enable" @cancel="form_cancel"></user-form>
     </div>
 </template>
 
@@ -59,6 +60,7 @@ import Component from "vue-class-component";
 import {Vue,Prop,Emit} from "vue-property-decorator";
 import {node, parent_position,submenu_type} from "./header_util"
 import HeaderSubMenu from "./header_submenu.vue"
+import UserForm from "./header_user_form.vue"
 
 export type user_model ={
     name: string,
@@ -69,20 +71,21 @@ export type user_model ={
     name: "HeaderUserMenu",
     components: {
         HeaderSubMenu,
+        UserForm,
     }
 })
 export default class HeaderUserMenu extends Vue{
     @Prop()
     private user!: user_model;
+    
+    private form_enable: boolean = false;
 
     private nodes:node[] = [
         {
             type: submenu_type.BUTTON,
             text: "Login",
             disable: !this.isLogined,
-            cb_click: ()=>{
-
-            }
+            cb_click: this.from_enable,
         },
         {
             type: submenu_type.BUTTON,
@@ -95,6 +98,14 @@ export default class HeaderUserMenu extends Vue{
     ]
     constructor(){
         super();
+    }
+
+    from_enable(){
+        this.form_enable = true;
+    }
+
+    form_cancel(){
+        this.form_enable = false;
     }
 
     get filltedNode(){

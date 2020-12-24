@@ -1,6 +1,8 @@
-from fastapi import FastAPI,HTTPException
+from fastapi import FastAPI,HTTPException,Cookie
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+
+from typing import Optional
 
 from pymysql.err import OperationalError
 
@@ -8,12 +10,17 @@ import ase
 import ase.db
 import numpy as np
 
-from . import db_server_url
+from . import db_server_url,cookie_time
 from .model import Base,engine,session
-from .model.user import User
+from .model.user import User,PostUserModel
+from .startup import up_initial_dataset
 
 app = FastAPI()
 Base.metadata.create_all(bind=engine)
+
+@app.on_event("startup")
+async def startup_event():
+    up_initial_dataset(db_server_url)
 
 @app.get('/apis/server/info')
 async def serverInfo():
@@ -23,24 +30,28 @@ async def serverInfo():
         }
     ))
 
+@app.post('/apis/user/login')
+async def user_login(post_user:PostUserModel):
+    """
+    """
+    user = User.authentication(post_user)
+    
+    response = JSONResponse(content=jsonable_encoder(
+        {
+            "id":user.id,
+            "name":user.name,
+        }
+    ))
+    response.set_cookie("user_id",str(user.id),max_age=cookie_time)
+    return response
+
 @app.post('/apis/user')
-async def add_user(name:str,pwd:str):
+async def add_user(post_user:PostUserModel):
     """
     
     """
-
-    # ユーザがすでに存在しているかチェック
-    user = User.getUserByName(session,name)
-    if user:
-        raise HTTPException(status_code=409,detail="This user already exists")
-
-    user = User()
-    user.name = name
-    user.hashed_password = User.hashed(pwd)
-    session.add(user)
-    session.commit()
-
-    user = User.getUserByName(session,name)
+    user = User.addUser(post_user)
+    
     return JSONResponse(content=jsonable_encoder(
         {
             "id":user.id,
@@ -49,7 +60,7 @@ async def add_user(name:str,pwd:str):
     ))
 
 @app.get('/apis/db/list')
-async def listup():
+async def listup( user_id:Optional[str] = Cookie(None)):
     try:
         db = ase.db.connect(db_server_url)
         return JSONResponse(content=jsonable_encoder(
@@ -69,7 +80,7 @@ async def listup():
         return "",503
 
 @app.get('/apis/db/data')
-def get(unique_id:str):
+def get(unique_id:str, user_id:Optional[str] = Cookie(None)):
     db = ase.db.connect(db_server_url)
     atoms = db.get("unique_id={}".format(unique_id))
 
