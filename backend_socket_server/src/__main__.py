@@ -1,5 +1,6 @@
-from fastapi import FastAPI,HTTPException,Cookie
+from fastapi import FastAPI,HTTPException,Cookie,Depends
 from fastapi.encoders import jsonable_encoder
+from fastapi.param_functions import Depends
 from fastapi.responses import JSONResponse
 
 import logging
@@ -11,10 +12,11 @@ from pymysql.err import OperationalError
 import ase
 import ase.db
 import numpy as np
+from sqlalchemy.ext import declarative
 
 from . import db_server_url,cookie_time
 from .model import Base,engine,session
-from .model.user import User,PostUserModel
+from .model.user import User,PostLoginUserModel,TokenModel
 from .startup import up_initial_dataset
 
 app = FastAPI(debug=True)
@@ -23,6 +25,12 @@ logger = logging.getLogger("uvicorn")
 
 @app.on_event("startup")
 async def startup_event():
+
+    try:
+        User.addUser(PostLoginUserModel(name="guest",pwd=""))
+    except HTTPException as e:
+        if e.status_code == 409:
+            pass
     up_initial_dataset(db_server_url)
 
 @app.get('/apis/server/info',)
@@ -33,27 +41,19 @@ async def serverInfo():
         }
     ))
 
-@app.post('/apis/user/login')
-async def user_login(post_user:PostUserModel):
+@app.post('/apis/user/login',response_model=TokenModel)
+async def user_login(user:User = Depends(User.authentication)):
     """
     """
-    user = User.authentication(post_user)
     
-    response = JSONResponse(content=jsonable_encoder(
-        {
-            "id":user.id,
-            "name":user.name,
-        }
-    ))
-    response.set_cookie("user_id",str(user.id),max_age=cookie_time)
-    return response
+    return user.create_tokens()
 
 @app.post('/apis/user')
-async def add_user(post_user:PostUserModel):
+async def add_user(user:User = Depends(User.addUser)):
     """
     
     """
-    user = User.addUser(post_user)
+    #user = User.addUser(post_user)
     
     return JSONResponse(content=jsonable_encoder(
         {
