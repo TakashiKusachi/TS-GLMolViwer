@@ -1,4 +1,4 @@
-from fastapi import FastAPI,HTTPException,Cookie,Depends
+from fastapi import FastAPI,HTTPException,Cookie,Depends,Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.param_functions import Depends
 from fastapi.responses import JSONResponse
@@ -22,8 +22,10 @@ from .model import Base,engine,session,systemOwner
 from .model.user import User,PostLoginUserModel,TokenModel
 from .model.system import System
 from .startup import up_initial_dataset
+from .exception.loginException import LoginErrorException
 
 app = FastAPI(debug=True)
+
 Base.metadata.create_all(bind=engine)
 logger = logging.getLogger("uvicorn")
 
@@ -48,6 +50,9 @@ async def serverInfo():
 @app.post('/apis/user/login',response_model=TokenModel)
 async def user_login(user:User = Depends(User.authentication)):
     """
+
+    Returns:
+        JSONResponse: 
     """
     token = user.create_tokens()
     response = JSONResponse(jsonable_encoder(
@@ -70,7 +75,7 @@ async def current_user(user:Optional[User]=Depends(User.getCurrentUserWithToken)
         ))
         return response
     else:
-        raise HTTPException(400,"Not login")
+        raise LoginErrorException()
 
 @app.post('/apis/user')
 async def add_user(user:User = Depends(User.addUser)):
@@ -136,3 +141,13 @@ def get(unique_id:str, user:User=Depends(User.getCurrentUserWithToken)):
     }
 
     return JSONResponse(content=jsonable_encoder(retdict))
+
+
+@app.exception_handler(LoginErrorException)
+async def login_error_exception_handler(request: Request, exc: LoginErrorException):
+    res = JSONResponse(
+        status_code=400,
+        content={"details":"Login refuse"}
+    )
+    res.set_cookie("access_token","",max_age=1,secure=True,httponly=True)
+    return res

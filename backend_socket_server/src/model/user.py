@@ -109,6 +109,11 @@ class User(Base):
 
     @staticmethod
     def getCurrentUserWithToken(access_token:Optional[str]=Cookie(None))->User:
+        """ test
+
+        Returns:
+            User: If access token is correct toekn, return the User,else return the None.
+        """
         if (access_token is None):
             return None
         pyload:Dict = jwt.decode(access_token,secret_key,algorithms="HS256")

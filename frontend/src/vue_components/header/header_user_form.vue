@@ -83,11 +83,23 @@ export default class UserForm extends Vue{
     constructor(){
         super();
     }
-
+    mounted(){
+        this.getUser()
+    }
     get form_class(){
         return{
             "hidden":!this.enable
         }
+    }
+
+    getUser(){
+        axios.get('/apis/user')
+            .then((response)=>{
+                let data = response.data
+                console.log(data)
+            }).catch((error)=>{
+                console.log(error)
+            })
     }
 
     submit(e:Event){
