@@ -3,8 +3,8 @@ services:
     nginx:
         image: nginx:1.18
         volumes:
-            - ./nginx_server:/etc/nginx/conf.d:ro
-            - front_code:/usr/share/nginx/html
+            - ./nginx_server/conf.d:/var/nginx/conf.d
+            - ./nginx_server/dumy_ssl:/usr/local/nginx/conf:ro
         depends_on: 
             - front_dev
             - socketserver
@@ -12,9 +12,16 @@ services:
             - front_dev
             - socketserver
         ports:
-            - 8080:80
+            - 8080:443
         environment:
             SOCKET_SERVER: socketserver:${API_SERVER_PORT}
+            FRONT_SERVER: front_dev:80
+        command: 
+            sh -c '
+            rm /etc/nginx/conf.d/* ;
+            cp -fr /var/nginx/conf.d /etc/nginx/ ;
+            sed -i -e "s/#api_server/socketserver:${API_SERVER_PORT}/" /etc/nginx/conf.d/default.conf;
+            cat /etc/nginx/conf.d/default.conf ; nginx -g "daemon off;"'
 
     socketserver:
         build:
@@ -36,9 +43,8 @@ services:
     front_dev:
         build:
             context: ./frontend
-        volumes:
-            - front_code:/dist
-        command: /bin/cp -rTf /app/app /dist 
+        expose: 
+            - 80
     
     db:
         image: mysql:5.7
@@ -66,12 +72,6 @@ services:
             - 8081:80
 
 volumes:
-    front_code:
-        driver_opts: 
-            type: none
-            device: ./frontend/app
-            o: bind
-
     database:
         driver: local
 
