@@ -8,7 +8,7 @@ RUN npm -prefix /app install --no-optional && npm -prefix /app cache clean --for
 COPY ./src/ /app/src/
 RUN npm -prefix /app run build
 
-COPY ./app/index.html /app/app/index.html
+COPY ./html/index.html /app/app/index.html
 
 FROM nginx:1.18 as runing_state
 COPY --from=build_stage /app/app /usr/share/nginx/html
