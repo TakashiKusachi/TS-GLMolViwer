@@ -4,7 +4,7 @@
         <ul class="right_side">
             <header-sub-menu v-for="submenu in filltedNode" :key="submenu.text" :root="submenu" ></header-sub-menu>
         </ul>
-        <user-form :enable="form_enable" @cancel="form_cancel"></user-form>
+        <user-form :enable="form_enable" @cancel="form_cancel" ></user-form>
     </div>
 </template>
 

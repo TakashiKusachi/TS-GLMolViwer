@@ -10,17 +10,21 @@ from ase.build import molecule
 import time
 import logging
 
+from sqlalchemy.orm import Session
 from sqlalchemy.exc import OperationalError
+
+from ..model.system import System
+from ..model import session
 
 logger = logging.getLogger('uvicorn')
 
-def up_initial_dataset(db_url):
+def up_initial_dataset(db_url,owner):
     length = 0
     count = 0
+    db:Session = session()
     while(True):
         try:
-            db = connect(db_url)
-            length = len(db)
+            length = db.query(System).count()
         except OperationalError as e:
             count += 1
             logger.info("OperationalError {}".format(count))
@@ -36,10 +40,24 @@ def up_initial_dataset(db_url):
         return
     for name in g2.names:
         try:
-            db = connect(db_url)
+            #db = connect(db_url)
             atoms = molecule(name)
-            atoms.calc = EMT()
-            db.write(atoms,releaxed=True,name=name,data={'description':'ASE sample data.'})
+            #atoms.calc = EMT()
+            #db.write(atoms,releaxed=True,name=name,data={'description':'ASE sample data.'})
+
+            sys = System()
+            sys.setAtoms(atoms)
+            sys.name = name
+            sys.unique_id = sys.makeUniqueId()
+            sys.description = 'ASE sample data.'
+            db = session()
+            db.add(sys)
+            db.commit()
+
+            owner.systems.append(sys)
+            db.add(owner)
+            db.commit()
+
         except NotImplementedError as e:
             pass
         except OperationalError as e:

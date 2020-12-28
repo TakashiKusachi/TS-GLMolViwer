@@ -8,6 +8,7 @@
                 <button type="submit">login</button>
                 <button type="button" @click="sign_up">sign up</button>
                 <button type="button" @click="cancel">cancel</button>
+                <p>現在このアプリケーションは、HTTPS/SSLに対応していません。Cookieでtokenを送信することでユーザ認証しているので外部から抜かれる可能性があります。閉じられたネットワーク環境などではない限り、パスワードは普段使っていないものを使用してください。</p>
             </form>
         </div>
     </div>
@@ -62,6 +63,7 @@
 
 import Component from "vue-class-component";
 import {Vue,Prop,Emit,Watch} from "vue-property-decorator";
+import {user_model} from "./header_user_menu.vue"
 
 import axios from "axios"
 
@@ -95,6 +97,8 @@ export default class UserForm extends Vue{
                     pwd: this.pwd,
                 }
             ).then((response)=>{
+                let data = response.data
+                console.log(data)
             }).catch((error)=>{
                 if(error.response){
                     let response = error.response
