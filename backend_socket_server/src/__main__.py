@@ -56,8 +56,21 @@ async def user_login(user:User = Depends(User.authentication)):
             "name":user.name,
         }
     ))
-    response.set_cookie("access_token",token["access_token"],httponly=True)
+    response.set_cookie("access_token",token["access_token"],httponly=True,secure=True)
     return response
+
+@app.get('/apis/user')
+async def current_user(user:Optional[User]=Depends(User.getCurrentUserWithToken)):
+    if user is not None:
+        response = JSONResponse(jsonable_encoder(
+            {
+                "id":user.id,
+                "name":user.name,
+            }
+        ))
+        return response
+    else:
+        raise HTTPException(400,"Not login")
 
 @app.post('/apis/user')
 async def add_user(user:User = Depends(User.addUser)):
