@@ -2,7 +2,16 @@
     <div class="header_menu_main_content" v-bind:class="{right_side:isRightSide}">
         {{root.text}}
         <ul v-if="root.childs.length > 0" v-bind:class="{right_side:isRightSide, left_side:!isRightSide}">
-            <header-sub-menu v-for="submenu in root.childs" :key="submenu.text" :root="submenu" ></header-sub-menu>
+            <header-sub-menu v-for="submenu in root.childs" :key="submenu.text" 
+                :type="submenu.type"
+                :position="submenu.position"
+                :disable="submenu.disable"
+                :text="submenu.text"
+                :childs="submenu.childs"
+                :cb_click="submenu.cb_click"
+                :cb_change="submenu.cb_change"
+                :multiple="submenu.multiple"
+            ></header-sub-menu>
         </ul>
     </div>
 </template>

@@ -1,10 +1,19 @@
 <template>
     <div class="header_user_menu right_side">
-        User
+        User: {{this.user.name}}
         <ul class="right_side">
-            <header-sub-menu v-for="submenu in filltedNode" :key="submenu.text" :root="submenu" ></header-sub-menu>
+            <header-sub-menu v-for="submenu in nodes" :key="submenu.text" 
+                :type="submenu.type"
+                :position="submenu.position"
+                :disable="submenu.disable"
+                :text="submenu.text"
+                :childs="submenu.childs"
+                :cb_click="submenu.cb_click"
+                :cb_change="submenu.cb_change"
+                :multiple="submenu.multiple"
+            ></header-sub-menu>
         </ul>
-        <user-form :enable="form_enable" @cancel="form_cancel" ></user-form>
+        <user-form :enable="form_enable" @cancel="form_cancel" @change_user_state="login"></user-form>
     </div>
 </template>
 
@@ -60,7 +69,7 @@ import Component from "vue-class-component";
 import {Vue,Prop,Emit} from "vue-property-decorator";
 import {node, parent_position,submenu_type} from "./header_util"
 import HeaderSubMenu from "./header_submenu.vue"
-import UserForm from "./header_user_form.vue"
+import UserForm,{userState} from "./header_user_form.vue"
 
 export type user_model ={
     name: string,
@@ -80,22 +89,26 @@ export default class HeaderUserMenu extends Vue{
     
     private form_enable: boolean = false;
 
-    private nodes:node[] = [
-        {
-            type: submenu_type.BUTTON,
-            text: "Login",
-            disable: !this.isLogined,
-            cb_click: this.from_enable,
+    private login_node:node ={
+        type: submenu_type.BUTTON,
+        text: "Login",
+        disable: true,
+        cb_click: this.from_enable,
+    }
+    private logout_node:node ={
+        type: submenu_type.BUTTON,
+        text: "Logout",
+        disable: false,
+        cb_click: ()=>{
+            
         },
-        {
-            type: submenu_type.BUTTON,
-            text: "Logout",
-            disable: this.isLogined,
-            cb_click: ()=>{
+    }
 
-            }
-        },
+    private nodes:node[] = [
+        this.login_node,
+        this.logout_node,
     ]
+
     constructor(){
         super();
     }
@@ -108,14 +121,19 @@ export default class HeaderUserMenu extends Vue{
         this.form_enable = false;
     }
 
-    get filltedNode(){
-        return this.nodes.filter((value)=>{
-            return value.disable==false
-        })
-    }
-
-    get isLogined(){
-        return this.user.id == ""
+    login(_user:userState){
+        if (_user.enable == true){
+            this.user.name = _user.name
+            this.user.id = _user.id
+            this.login_node.disable = false
+            this.logout_node.disable = true
+        }
+        else{
+            this.user.name = ""
+            this.user.id = ""
+            this.login_node.disable = true
+            this.logout_node.disable = false
+        }
     }
 }
 

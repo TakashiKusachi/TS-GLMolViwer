@@ -67,6 +67,11 @@ import {user_model} from "./header_user_menu.vue"
 
 import axios from "axios"
 
+export type userState={
+    name: string,
+    id: string,
+    enable: boolean,
+}
 
 @Component({
     name: "UserForm",
@@ -96,9 +101,18 @@ export default class UserForm extends Vue{
         axios.get('/apis/user')
             .then((response)=>{
                 let data = response.data
-                console.log(data)
+                this.changeUserState({
+                    name: data.name,
+                    id: data.id,
+                    enable: true,
+                })
             }).catch((error)=>{
                 console.log(error)
+                this.changeUserState({
+                    name: "",
+                    id: "",
+                    enable: false,
+                })
             })
     }
 
@@ -110,7 +124,7 @@ export default class UserForm extends Vue{
                 }
             ).then((response)=>{
                 let data = response.data
-                console.log(data)
+                this.getUser()
             }).catch((error)=>{
                 if(error.response){
                     let response = error.response
@@ -136,6 +150,11 @@ export default class UserForm extends Vue{
                     this.inftext = response.data.detail
                 }
             })
+    }
+
+    @Emit("change_user_state")
+    changeUserState(state:userState):userState{
+        return state
     }
 
     @Emit("cancel")
