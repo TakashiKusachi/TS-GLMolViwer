@@ -50,13 +50,14 @@ def up_initial_dataset(db_url,owner):
             sys.name = name
             sys.unique_id = sys.makeUniqueId()
             sys.description = 'ASE sample data.'
+            sys.owner = owner
             db = session()
             db.add(sys)
             db.commit()
 
-            owner.systems.append(sys)
-            db.add(owner)
-            db.commit()
+            #owner.systems.append(sys)
+            #db.add(owner)
+            #db.commit()
 
         except NotImplementedError as e:
             pass

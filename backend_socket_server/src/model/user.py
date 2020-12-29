@@ -3,7 +3,7 @@ from __future__ import annotations
 from fastapi import HTTPException,Depends,Cookie
 from fastapi.security import OAuth2PasswordBearer
 
-from . import Base,session,systemOwner
+from . import Base,session
 from .. import secret_key
 from sqlalchemy import Column, Integer, String, Text
 from sqlalchemy.orm import Session,relationship
@@ -37,7 +37,7 @@ class User(Base):
     name = Column(String(254),unique=True,index=True,nullable=False)
     hashed_password = Column(String(128))
     refresh_token = Column(Text,nullable=True)
-    systems = relationship("System",back_populates="owners",secondary=systemOwner)
+    systems = relationship("System",back_populates="owner")
 
     @staticmethod
     def getUserByName(name:str, db: Session = session())->User:

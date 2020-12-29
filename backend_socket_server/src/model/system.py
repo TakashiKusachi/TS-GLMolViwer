@@ -12,7 +12,7 @@ from uuid import uuid4
 
 import ase
 
-from . import Base,session,systemOwner
+from . import Base,session
 
 logger = logging.getLogger("uvicorn")
 
@@ -46,7 +46,8 @@ class System(Base):
     description = Column(Text)
     numbers = Column(NumbersArray)
     positions = Column(PositionArray)
-    owners = relationship("User",back_populates="systems",secondary=systemOwner)
+    owner_id = Column(Integer,ForeignKey("users.id"))
+    owner = relationship("User",back_populates="systems")
 
     def setAtoms(self,atoms:ase.Atoms):
         self.numbers = atoms.numbers

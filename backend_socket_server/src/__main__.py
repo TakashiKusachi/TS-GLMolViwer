@@ -18,7 +18,7 @@ from sqlalchemy.ext import declarative
 from sqlalchemy.orm import Session,contains_eager,subqueryload
 
 from . import db_server_url,cookie_time
-from .model import Base,engine,session,systemOwner
+from .model import Base,engine,session
 from .model.user import User,PostLoginUserModel,TokenModel
 from .model.system import System
 from .startup import up_initial_dataset
@@ -115,11 +115,8 @@ async def listup( user:Optional[User]=Depends(User.getCurrentUserWithToken)):
         q_user_id = db.query(User.id)\
             .filter(User.name.in_(target_user))
 
-        q_ownerd_system =  db.query(systemOwner.c.system_id).\
-            filter(systemOwner.c.user_id.in_(q_user_id))
-
         q_system = db.query(System.id,System.unique_id,System.name,System.description,)\
-            .filter(System.id.in_(q_ownerd_system))
+            .filter(System.owner_id.in_(q_user_id))
 
 
         dataset.extend([
