@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI,HTTPException,Cookie,Depends,Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.param_functions import Depends
@@ -6,7 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 import logging
 
-from typing import Optional
+from typing import Iterable, Optional
 
 from pymysql.err import OperationalError
 
@@ -20,6 +21,7 @@ from sqlalchemy.orm import Session,contains_eager,subqueryload
 from . import db_server_url,cookie_time
 from .model import Base,engine,session
 from .model.user import User,PostLoginUserModel,TokenModel
+from .model.group import Group
 from .model.system import System
 from .startup import up_initial_dataset
 from .exception.loginException import LoginErrorException
@@ -115,18 +117,22 @@ async def listup( user:Optional[User]=Depends(User.getCurrentUserWithToken)):
         q_user_id = db.query(User.id)\
             .filter(User.name.in_(target_user))
 
-        q_system = db.query(System.id,System.unique_id,System.name,System.description,)\
-            .filter(System.owner_id.in_(q_user_id))
-
+        systems:Iterable[System] = db.query(
+                System.id,System.unique_id,
+                System.name,System.description,
+                User.name,Group.name)\
+            .join(System.owner).join(System.group).filter(System.owner_id.in_(q_user_id)).all()
 
         dataset.extend([
             {
-                'id':sys.id,
-                'unique_id':sys.unique_id,
-                'name':sys.name,
-                'description':sys.description
+                'id':id,
+                'unique_id':unique_id,
+                'name':name,
+                'owner_name': owner_name,
+                'group_name':group_name,
+                'description':description
             }
-            for sys in q_system.all()
+            for (id,unique_id,name,description,owner_name,group_name) in systems
         ])
     except OperationalError as e:
         logger.debug("{} is down".format(db_server_url))

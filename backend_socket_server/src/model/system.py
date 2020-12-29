@@ -48,6 +48,8 @@ class System(Base):
     positions = Column(PositionArray)
     owner_id = Column(Integer,ForeignKey("users.id"))
     owner = relationship("User",back_populates="systems")
+    group_id = Column(Integer,ForeignKey("groups.id"))
+    group = relationship("Group",back_populates="systems")
 
     def setAtoms(self,atoms:ase.Atoms):
         self.numbers = atoms.numbers

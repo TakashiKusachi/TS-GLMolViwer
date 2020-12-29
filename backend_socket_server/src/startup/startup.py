@@ -13,12 +13,14 @@ import logging
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import OperationalError
 
+from ..model.group import Group
+from ..model.user import User
 from ..model.system import System
 from ..model import session
 
 logger = logging.getLogger('uvicorn')
 
-def up_initial_dataset(db_url,owner):
+def up_initial_dataset(db_url,owner:User):
     length = 0
     count = 0
     db:Session = session()
@@ -51,6 +53,7 @@ def up_initial_dataset(db_url,owner):
             sys.unique_id = sys.makeUniqueId()
             sys.description = 'ASE sample data.'
             sys.owner = owner
+            sys.group = Group.getGroupByName(owner.name)
             db = session()
             db.add(sys)
             db.commit()
