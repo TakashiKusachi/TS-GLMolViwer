@@ -100,7 +100,17 @@ export default class HeaderUserMenu extends Vue{
         text: "Logout",
         disable: false,
         cb_click: ()=>{
-            
+                axios.post('/apis/user/logout',
+                ).then((response)=>{
+                    this.login({
+                        name:"",id:"",enable:false
+                    })
+                }).catch((error)=>{
+                    alert("正常にログアウトできませんでした。強制ログアウトを行いました。")
+                    this.login({
+                        name:"",id:"",enable:false
+                    })
+            })
         },
     }
 
@@ -134,6 +144,7 @@ export default class HeaderUserMenu extends Vue{
             this.login_node.disable = true
             this.logout_node.disable = false
         }
+        this.form_cancel()
     }
 }
 

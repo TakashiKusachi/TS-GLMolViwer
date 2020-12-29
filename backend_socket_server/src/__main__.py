@@ -47,7 +47,7 @@ async def serverInfo():
         }
     ))
 
-@app.post('/apis/user/login',response_model=TokenModel)
+@app.post('/apis/user/login')
 async def user_login(user:User = Depends(User.authentication)):
     """
 
@@ -63,6 +63,17 @@ async def user_login(user:User = Depends(User.authentication)):
     ))
     response.set_cookie("access_token",token["access_token"],httponly=True,secure=True)
     return response
+
+@app.post('/apis/user/logout')
+async def user_logout(user:Optional[User]=Depends(User.getCurrentUserWithToken)):
+    if user is not None:
+        res = JSONResponse(
+            content={"detail":"success"}
+        )
+        res.set_cookie("access_token","",max_age=1,secure=True,httponly=True)
+        return res
+    else:
+        raise LoginErrorException()
 
 @app.get('/apis/user')
 async def current_user(user:Optional[User]=Depends(User.getCurrentUserWithToken)):
