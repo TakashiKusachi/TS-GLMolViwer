@@ -8,7 +8,6 @@
                 <button type="submit">login</button>
                 <button type="button" @click="sign_up">sign up</button>
                 <button type="button" @click="cancel">cancel</button>
-                <p>現在このアプリケーションは、HTTPS/SSLに対応していません。Cookieでtokenを送信することでユーザ認証しているので外部から抜かれる可能性があります。閉じられたネットワーク環境などではない限り、パスワードは普段使っていないものを使用してください。</p>
             </form>
         </div>
     </div>
@@ -63,15 +62,9 @@
 
 import Component from "vue-class-component";
 import {Vue,Prop,Emit,Watch} from "vue-property-decorator";
-import {user_model} from "./header_user_menu.vue"
 
 import axios from "axios"
-
-export type userState={
-    name: string,
-    id: string,
-    enable: boolean,
-}
+import {vxm} from "../../store"
 
 @Component({
     name: "UserForm",
@@ -85,54 +78,28 @@ export default class UserForm extends Vue{
 
     private inftext:string = "";
 
+    private get islogin(){return vxm.user.isLogin}
+
     constructor(){
         super();
     }
-    mounted(){
-        this.getUser()
-    }
+
     get form_class(){
         return{
             "hidden":!this.enable
         }
     }
 
-    getUser(){
-        axios.get('/apis/user')
-            .then((response)=>{
-                let data = response.data
-                this.changeUserState({
-                    name: data.name,
-                    id: data.id,
-                    enable: true,
-                })
-            }).catch((error)=>{
-                console.log(error)
-                this.changeUserState({
-                    name: "",
-                    id: "",
-                    enable: false,
-                })
-            })
-    }
-
     submit(e:Event){
-        axios.post('/apis/user/login',
-                {
-                    name: this.name,
-                    pwd: this.pwd,
-                }
-            ).then((response)=>{
-                let data = response.data
-                this.getUser()
-            }).catch((error)=>{
-                if(error.response){
-                    let response = error.response
-                    console.log(response)
-                    let status = response.status
-                    this.inftext = response.data.detail
-                }
-            })
+        vxm.user.login({name:this.name,pwd:this.pwd})
+        .then(()=>{
+            this.login_success()
+        })
+        .catch((error)=>{
+            console.log("in user form ")
+            console.log(error)
+            this.inftext=error
+        })
     }
 
     sign_up(e:Event){
@@ -152,13 +119,13 @@ export default class UserForm extends Vue{
             })
     }
 
-    @Emit("change_user_state")
-    changeUserState(state:userState):userState{
-        return state
-    }
-
     @Emit("cancel")
     cancel(e:Event){
+        return
+    }
+
+    @Emit("login_success")
+    login_success(){
         return
     }
 
@@ -167,6 +134,7 @@ export default class UserForm extends Vue{
         if (newState==true && oldState==false){
             this.name=""
             this.pwd=""
+            this.inftext=""
         }
     }
 }

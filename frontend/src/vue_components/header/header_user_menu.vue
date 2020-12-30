@@ -1,6 +1,6 @@
 <template>
     <div class="header_user_menu right_side">
-        User: {{this.user.name}}
+        User: {{this.name}}
         <ul class="right_side">
             <header-sub-menu v-for="submenu in nodes" :key="submenu.text" 
                 :type="submenu.type"
@@ -13,7 +13,7 @@
                 :multiple="submenu.multiple"
             ></header-sub-menu>
         </ul>
-        <user-form :enable="form_enable" @cancel="form_cancel" @change_user_state="login"></user-form>
+        <user-form :enable="form_enable" @cancel="form_cancel" @login_success="getUserInfo"></user-form>
     </div>
 </template>
 
@@ -66,15 +66,12 @@
 <script lang="ts">
 import axios from "axios"
 import Component from "vue-class-component";
-import {Vue,Prop,Emit} from "vue-property-decorator";
+import {Vue,Prop,Emit, Watch} from "vue-property-decorator";
 import {node, parent_position,submenu_type} from "./header_util"
 import HeaderSubMenu from "./header_submenu.vue"
-import UserForm,{userState} from "./header_user_form.vue"
+import UserForm from "./header_user_form.vue"
 
-export type user_model ={
-    name: string,
-    id: string,
-}
+import {vxm} from "../../store"
 
 @Component({
     name: "HeaderUserMenu",
@@ -84,8 +81,8 @@ export type user_model ={
     }
 })
 export default class HeaderUserMenu extends Vue{
-    @Prop()
-    private user!: user_model;
+    private name:string = "";
+    private get logined(){return vxm.user.isLogin}
     
     private form_enable: boolean = false;
 
@@ -99,19 +96,7 @@ export default class HeaderUserMenu extends Vue{
         type: submenu_type.BUTTON,
         text: "Logout",
         disable: false,
-        cb_click: ()=>{
-                axios.post('/apis/user/logout',
-                ).then((response)=>{
-                    this.login({
-                        name:"",id:"",enable:false
-                    })
-                }).catch((error)=>{
-                    alert("正常にログアウトできませんでした。強制ログアウトを行いました。")
-                    this.login({
-                        name:"",id:"",enable:false
-                    })
-            })
-        },
+        cb_click: vxm.user.logout,
     }
 
     private nodes:node[] = [
@@ -123,6 +108,10 @@ export default class HeaderUserMenu extends Vue{
         super();
     }
 
+    mounted(){
+        this.getUserInfo()
+    }
+
     from_enable(){
         this.form_enable = true;
     }
@@ -131,20 +120,24 @@ export default class HeaderUserMenu extends Vue{
         this.form_enable = false;
     }
 
-    login(_user:userState){
-        if (_user.enable == true){
-            this.user.name = _user.name
-            this.user.id = _user.id
+    @Watch('logined')
+    changeLoginState(newstate:boolean,oldstate:boolean){
+        this.getUserInfo();
+    }
+
+
+    getUserInfo(){
+        vxm.user.getUser().then(()=>{
+            this.name = vxm.user.name;
             this.login_node.disable = false
             this.logout_node.disable = true
-        }
-        else{
-            this.user.name = ""
-            this.user.id = ""
+            this.form_cancel()
+        }).catch((error)=>{
+            this.name = vxm.user.name;
             this.login_node.disable = true
             this.logout_node.disable = false
-        }
-        this.form_cancel()
+            this.form_cancel()
+        })
     }
 }
 

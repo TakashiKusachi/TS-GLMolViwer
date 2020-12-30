@@ -1,12 +1,6 @@
 <template>
     <div id="view" v-bind:class="{hidden:is_hidden}">
-        <div id="view-main">
-            <table>
-                <tr v-for="item in dataset" :key="item.id" @click="select_click(item.id)" v-bind:class="{checked: is_selected(item.id)}">
-                    <td>{{item.name}}</td>
-                </tr>
-            </table>
-        </div>
+        <div id="grid"></div>
         <p>{{textarea}}</p>
         <input type="button" value="OK" @click="selectId"><input type="button" value="Cancel" @click="click_cancel"/>
     </div>
@@ -16,8 +10,8 @@
 div#view {
     float: left;
     position: absolute;
-    top: 100vh / 2 - 25vh;
-    height: 50vh;
+    top: 100vh / 2 - 35vh;
+    height: 70vh;
     left: 100vw / 2 - 25vw;
     width: 50vw;
     background-color: white;
@@ -29,19 +23,6 @@ div#view {
         &#view-main {
             height : 50%;
             table{
-                height: 100%;
-                display: block;
-                overflow-y: scroll;
-                border-collapse: collapse;
-                tr{
-                    display: block;
-                    background-color: white;
-                    width: 100%;
-                    td{
-                        display: block;
-                        border-color: 1px solid black;
-                    }
-                }
                 tr.checked{
                     background-color: yellowgreen;
                 }
@@ -75,12 +56,17 @@ div#view {
 
 import Component from "vue-class-component";
 import {Vue,Prop,Emit, Watch} from "vue-property-decorator";
+import {Grid as jGrid} from "gridjs"
+import "gridjs/dist/theme/mermaid.css"
+import {RowSelection} from "gridjs-selection"
 
 type datalist={
     id:number,
     name:string,
     unique_id:string,
     description:string,
+    owner_name:string,
+    group_name:string,
 }
 
 @Component({
@@ -103,6 +89,7 @@ export default class example_viwe extends Vue{
     @Watch("dataset")
     chande_dataset(newData:datalist[], oldData:datalist[]){
         this.is_hidden = false;
+        this.make_grid(newData)
     }
 
     click_cancel(){
@@ -113,7 +100,7 @@ export default class example_viwe extends Vue{
         return this.selected === id;
     }
 
-    select_click(id:number){
+    select_click(id:number,description:string=""){
         this.selected = id;
         if (this.dataset === null || this.dataset.length == 0){
             console.log("dataset is empty")
@@ -142,5 +129,48 @@ export default class example_viwe extends Vue{
         return query.unique_id;
     }
 
+    make_grid(data:datalist[]){
+        let grid = new jGrid({
+            columns:[
+                {id:"id",           name:"index",       hidden:true},
+                {id:"unique_id",    name:"unique_id",   hidden:true},
+                {id:"name",         name:"name",        hidden:false},
+                {id:"description",  name:"description", hidden:true},
+                {id:"owner_name",   name:"owner name",  hidden:false},
+                {id:"group_name",    name:"group name",  hidden:false}
+            ],
+            data: data,
+            pagination: {
+                limit: 10,
+                enabled: true,
+            },
+            style:{
+                table:{
+                    'overflow':"scroll",
+                    'height':"40%",
+                    'width':"80%"
+                },
+                th:{
+                    'padding':"0px",
+                    'size':"10px"
+                },
+                td:{
+                    'padding':"0px",
+                    'size':"10px"
+                }
+            }
+        })
+
+        grid.on("rowClick",(e,row)=>{
+            let cells = row.cells
+            console.log(row)
+            console.log(cells)
+
+        })
+
+        grid.render(document.getElementById("grid") as Element)
+
+        return grid
+    }
 }
 </script>
