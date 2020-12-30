@@ -2,7 +2,7 @@
     <div id="vueapp">
         <loader-view :enable="loaderEnable"></loader-view>
         <new-atom-form :enable="newAtomEnable" @submit="newAtomSubmit" @cancel="newAtomCancel"></new-atom-form>
-        <header-menu :nodes="nodes" :user="user"></header-menu>
+        <header-menu :nodes="nodes"></header-menu>
         <example-viwe :dataset="example_dataset" @select_id="load_model"></example-viwe>
         <div id="main-contents">
             <div id="main-contents-left"><viwer id="view-area" :system="system" @busy="showLoaderView" @ready="hideLoaderView"></viwer></div>
@@ -93,7 +93,7 @@ import Component from "vue-class-component";
 import {Vue,Prop,Emit, Watch} from "vue-property-decorator";
 import NewAtomForm from './addAtom.vue';
 import LoaderView from "./loaderView.vue";
-import HeaderMenu,{user_model} from "./header/header.vue";
+import HeaderMenu from "./header/header.vue";
 import Propaties from "./propaties/index.vue"
 import Viwer from "./viwer/viwer.vue"
 import ExampleViwe from "./Example_viwe/example_viwe.vue"
@@ -101,6 +101,8 @@ import {node, parent_position, submenu_type} from "./header/header_util"
 
 import io from "socket.io-client"
 import axios from "axios"
+import {vxm} from "../store"
+
 import { BondType } from "../systems/system"
 
 @Component({
@@ -127,7 +129,6 @@ export default class MainPage extends Vue{
     private timer:number = 0;
     private is_server_connected: boolean = false;
     private server_name: string = "";
-    private user:user_model;
 
     private nodes:node[] = [
         {
@@ -159,7 +160,10 @@ export default class MainPage extends Vue{
                     text:"BackGraund",
                     type:submenu_type.BUTTON,
                     disable: true,
-                    cb_click:(e)=>{},
+                    cb_click:(e)=>{
+                        vxm.user.setName("test")
+                        alert(vxm.user.name)
+                    },
                 }
             ]
         },
@@ -200,10 +204,6 @@ export default class MainPage extends Vue{
 
     constructor(){
         super();
-        this.user = {
-            name: "",
-            id: "",
-        }
     }
 
     mounted(){

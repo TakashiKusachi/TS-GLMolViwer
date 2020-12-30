@@ -3,8 +3,10 @@ from __future__ import annotations
 from fastapi import HTTPException,Depends,Cookie
 from fastapi.security import OAuth2PasswordBearer
 
-from . import Base,session,systemOwner
+from . import Base,session
 from .. import secret_key
+from .group import Group
+from .user_group import users_groups_table
 from sqlalchemy import Column, Integer, String, Text
 from sqlalchemy.orm import Session,relationship
 
@@ -37,7 +39,8 @@ class User(Base):
     name = Column(String(254),unique=True,index=True,nullable=False)
     hashed_password = Column(String(128))
     refresh_token = Column(Text,nullable=True)
-    systems = relationship("System",back_populates="owners",secondary=systemOwner)
+    groups = relationship("Group",secondary=users_groups_table,back_populates="users")
+    systems = relationship("System",back_populates="owner")
 
     @staticmethod
     def getUserByName(name:str, db: Session = session())->User:
@@ -58,7 +61,7 @@ class User(Base):
         return user_ctx.hash(pwd)
 
     @staticmethod
-    def addUser(usermodel:PostLoginUserModel)->User:
+    def addUser(usermodel:PostLoginUserModel,skip_group_create:bool=False)->User:
         """ add user
 
 
@@ -80,6 +83,15 @@ class User(Base):
         db:Session = session()
         db.add(user)
         db.commit()
+
+        if skip_group_create == False:
+            group = Group()
+            group.name = usermodel.name
+            group.users.append(user)
+            db:Session = session()
+            db.add(group)
+            db.commit()
+
         return user
 
     @staticmethod

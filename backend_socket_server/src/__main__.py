@@ -1,3 +1,4 @@
+
 from fastapi import FastAPI,HTTPException,Cookie,Depends,Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.param_functions import Depends
@@ -6,7 +7,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 import logging
 
-from typing import Optional
+from typing import Iterable, Optional
 
 from pymysql.err import OperationalError
 
@@ -18,8 +19,9 @@ from sqlalchemy.ext import declarative
 from sqlalchemy.orm import Session,contains_eager,subqueryload
 
 from . import db_server_url,cookie_time
-from .model import Base,engine,session,systemOwner
+from .model import Base,engine,session
 from .model.user import User,PostLoginUserModel,TokenModel
+from .model.group import Group
 from .model.system import System
 from .startup import up_initial_dataset
 from .exception.loginException import LoginErrorException
@@ -47,7 +49,7 @@ async def serverInfo():
         }
     ))
 
-@app.post('/apis/user/login',response_model=TokenModel)
+@app.post('/apis/user/login')
 async def user_login(user:User = Depends(User.authentication)):
     """
 
@@ -63,6 +65,17 @@ async def user_login(user:User = Depends(User.authentication)):
     ))
     response.set_cookie("access_token",token["access_token"],httponly=True,secure=True)
     return response
+
+@app.post('/apis/user/logout')
+async def user_logout(user:Optional[User]=Depends(User.getCurrentUserWithToken)):
+    if user is not None:
+        res = JSONResponse(
+            content={"detail":"success"}
+        )
+        res.set_cookie("access_token","",max_age=1,secure=True,httponly=True)
+        return res
+    else:
+        raise LoginErrorException()
 
 @app.get('/apis/user')
 async def current_user(user:Optional[User]=Depends(User.getCurrentUserWithToken)):
@@ -104,21 +117,22 @@ async def listup( user:Optional[User]=Depends(User.getCurrentUserWithToken)):
         q_user_id = db.query(User.id)\
             .filter(User.name.in_(target_user))
 
-        q_ownerd_system =  db.query(systemOwner.c.system_id).\
-            filter(systemOwner.c.user_id.in_(q_user_id))
-
-        q_system = db.query(System.id,System.unique_id,System.name,System.description,)\
-            .filter(System.id.in_(q_ownerd_system))
-
+        systems:Iterable[System] = db.query(
+                System.id,System.unique_id,
+                System.name,System.description,
+                User.name,Group.name)\
+            .join(System.owner).join(System.group).filter(System.owner_id.in_(q_user_id)).all()
 
         dataset.extend([
             {
-                'id':sys.id,
-                'unique_id':sys.unique_id,
-                'name':sys.name,
-                'description':sys.description
+                'id':id,
+                'unique_id':unique_id,
+                'name':name,
+                'owner_name': owner_name,
+                'group_name':group_name,
+                'description':description
             }
-            for sys in q_system.all()
+            for (id,unique_id,name,description,owner_name,group_name) in systems
         ])
     except OperationalError as e:
         logger.debug("{} is down".format(db_server_url))
