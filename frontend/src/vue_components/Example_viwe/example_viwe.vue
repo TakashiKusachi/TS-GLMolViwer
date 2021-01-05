@@ -10,12 +10,13 @@
 div#view {
     float: left;
     position: absolute;
-    top: 100vh / 2 - 35vh;
-    height: 70vh;
-    left: 100vw / 2 - 25vw;
-    width: 50vw;
+    top: 100vh / 2 - 40vh;
+    height: 80vh;
+    left: 100vw / 2 - 30vw;
+    width: 60vw;
     background-color: white;
     border: 3px outset gray;
+    overflow-y: scroll;
     div{
         float:none;
         position:relative;
