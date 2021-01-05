@@ -1,9 +1,9 @@
 
 import {ISystem,IBond,IAtom} from "./system"
-import {System } from "./system"
+import {System,Atom } from "./system"
 
 
-export {System,ISystem,IAtom,IBond}
+export {System,ISystem,IAtom,IBond,Atom}
 
 /**
 export type AnySystem = CarSystem;
