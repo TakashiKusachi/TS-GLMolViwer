@@ -2,8 +2,11 @@
     <div id="view" v-bind:class="{hidden:is_hidden}">
         <div id="view-main">
             <table>
+                <tr>
+                    <th>name</th><th>owner name</th><th>group name</th>
+                </tr>
                 <tr v-for="item in dataset" :key="item.id" @click="select_click(item.id)" v-bind:class="{checked: is_selected(item.id)}">
-                    <td>{{item.name}}</td>
+                    <td>{{item.name}}</td><td>{{item.owner_name}}</td><td>{{item.group_name}}</td>
                 </tr>
             </table>
         </div>
@@ -18,8 +21,8 @@ div#view {
     position: absolute;
     top: 100vh / 2 - 25vh;
     height: 50vh;
-    left: 100vw / 2 - 25vw;
-    width: 50vw;
+    left: 100vw / 2 - 35vw;
+    width: 70vw;
     background-color: white;
     border: 3px outset gray;
     div{
@@ -28,18 +31,26 @@ div#view {
 
         &#view-main {
             height : 50%;
+            overflow-y: scroll;
             table{
                 height: 100%;
-                display: block;
-                overflow-y: scroll;
+                display: table;
                 border-collapse: collapse;
                 tr{
-                    display: block;
+                    display: table-row;
                     background-color: white;
                     width: 100%;
+                    th{
+                        display: table-cell;
+                        padding: 0px 2em;
+                        border: 1px solid black;
+                        background-color: gray;
+                    }
                     td{
-                        display: block;
-                        border-color: 1px solid black;
+                        display: table-cell;
+                        width: auto;
+                        padding: 0px 2em;
+                        border: 1px solid gray;
                     }
                 }
                 tr.checked{
@@ -81,6 +92,8 @@ type datalist={
     name:string,
     unique_id:string,
     description:string,
+    owner_name:string,
+    group_name:string,
 }
 
 @Component({
