@@ -268,8 +268,14 @@ export default class MainPage extends Vue{
     }
 
     selectAtom(name:string){
+        console.log(name)
         if(this.system != null){
-            this.select_atom = this.system.getAtom(this.system?.atomIndexOf(name))
+            if(name == ""){
+                this.select_atom = null;
+            }
+            else{
+                this.select_atom = this.system.getAtom(this.system?.atomIndexOf(name))
+            }
         }
     }
 
