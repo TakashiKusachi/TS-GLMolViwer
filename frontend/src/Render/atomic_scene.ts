@@ -2,7 +2,7 @@
 import * as THREE from 'three'
 import {Scene,Vector3, Object3D} from 'three'
 
-import {cube_segments,bond_radius,bond_segments,default_colors} from "./parameters"
+import {cube_segments,bond_radius,bond_segments,default_colors,atoms_layer,bonds_layer} from "./parameters"
 import {System,IAtom} from "../systems"
 
 export class AtomicScene{
@@ -109,6 +109,7 @@ export class AtomicScene{
     
             box.name = name;
             box.position.set(pos[0],pos[1],pos[2]);
+            box.layers.enable(atoms_layer)
             accum = accum.add(box.position);
             gatomics.add(box);
         }
@@ -138,6 +139,7 @@ export class AtomicScene{
             let quaternion = new THREE.Quaternion();
             quaternion.setFromAxisAngle(nm_bond_vec,-angle);
             box.rotation.setFromQuaternion(quaternion)
+            box.layers.enable(bonds_layer)
             gbond.add(box);
     
         }

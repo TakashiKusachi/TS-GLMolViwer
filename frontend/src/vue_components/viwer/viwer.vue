@@ -65,8 +65,7 @@ export default class Viwer extends Vue{
     }
 
     selectAtom(e:SelectedEvent){
-        this.renderer?.deleteAtom(e.select);
-        alert(e.select);
+        this.$emit("selectAtom",e.select)
     }
 
     @Watch('system')

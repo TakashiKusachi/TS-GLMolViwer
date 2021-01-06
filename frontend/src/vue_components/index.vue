@@ -5,8 +5,8 @@
         <header-menu :nodes="nodes"></header-menu>
         <example-viwe :dataset="example_dataset" @select_id="load_model"></example-viwe>
         <div id="main-contents">
-            <div id="main-contents-left"><viwer id="view-area" :system="system" @busy="showLoaderView" @ready="hideLoaderView"></viwer></div>
-            <div id="main-contents-right"><propaties :system="system"></propaties></div>
+            <div id="main-contents-left"><viwer id="view-area" :system="system" @busy="showLoaderView" @ready="hideLoaderView" @selectAtom="selectAtom"></viwer></div>
+            <div id="main-contents-right"><propaties :system="system" :atom="select_atom"></propaties></div>
         </div>
         <div id="fotter-contents">
             <div id="state">
@@ -103,7 +103,7 @@ import io from "socket.io-client"
 import axios from "axios"
 import {vxm} from "../store"
 
-import { BondType } from "../systems/system"
+import { BondType ,Atom} from "../systems/system"
 
 @Component({
     name: "Index",
@@ -118,6 +118,7 @@ import { BondType } from "../systems/system"
 })
 export default class MainPage extends Vue{
     private system: System | null = null;
+    private select_atom: Atom|null = null;
 
     private newAtomEnable = false;
     private loaderEnable = false;
@@ -264,6 +265,18 @@ export default class MainPage extends Vue{
     }
     newAtomCancel(){
         this.newAtomEnable = false;
+    }
+
+    selectAtom(name:string){
+        console.log(name)
+        if(this.system != null){
+            if(name == ""){
+                this.select_atom = null;
+            }
+            else{
+                this.select_atom = this.system.getAtom(this.system?.atomIndexOf(name))
+            }
+        }
     }
 
     online_example(){

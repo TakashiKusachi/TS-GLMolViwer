@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { Object3D, Vector3, Raycaster, Vector2, GridHelper, Group } from 'three';
 
 import {System} from "../systems"
-import {cube_segments,bond_radius,bond_segments,default_colors} from "./parameters"
+import {cube_segments,bond_radius,bond_segments,default_colors, atoms_layer} from "./parameters"
 import {MatStdControl} from "../control/MatStdControl"
 
 
@@ -167,10 +167,14 @@ export abstract class Render{
        this.mouse.x = mouse_x;
        this.mouse.y = mouse_y;
         this.raycaster.setFromCamera(this.mouse, this.camera);
+        this.raycaster.layers.set(atoms_layer)
         const intersects = this.raycaster.intersectObjects(this.scene.children,true);
         if (intersects.length > 0){
             let obj = intersects[0].object;
             this.selected(obj,obj.name);
+        }
+        else{
+            this.selected(null,"");
         }
     }
     
@@ -189,7 +193,7 @@ export abstract class Render{
      * @param obj Not Used
      * @param name 
      */
-    selected(obj:Object3D,name: string){
+    selected(obj:Object3D|null,name: string){
         this.cbSelected.forEach((cb)=>{
             cb({select:name})
         })
@@ -229,6 +233,7 @@ export abstract class Render{
         //this.renderer.dispose();
 
         var axes = new THREE.AxesHelper();
+        axes.name = "AxesHelper"
         this.scene.add(axes);
         this.scene.add(this.light);
     }

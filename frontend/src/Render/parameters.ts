@@ -25,3 +25,6 @@ export const default_colors:Array<number> = [
 
 export const bond_segments = 10
 export const bond_radius = 0.1
+
+export const atoms_layer = 1
+export const bonds_layer = 2
