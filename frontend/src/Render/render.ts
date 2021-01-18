@@ -194,6 +194,16 @@ export abstract class Render{
      * @param name 
      */
     selected(obj:Object3D|null,name: string){
+        const cube = new THREE.SphereGeometry(0.5,cube_segments,cube_segments);
+        
+        var meshopt = {}
+        meshopt = {color:0xffffff}
+        const material = new THREE.MeshStandardMaterial(meshopt);
+        
+        const box = new THREE.Mesh(cube, material);
+
+        obj?.parent?.add(box)
+        
         this.cbSelected.forEach((cb)=>{
             cb({select:name})
         })
