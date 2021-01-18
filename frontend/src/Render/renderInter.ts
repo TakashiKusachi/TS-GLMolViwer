@@ -181,7 +181,7 @@ export class WorkerAtomicRender extends CanvasEventHandler implements IAtomicRen
         this.selectObserver = this.worker?.__setSelectEventObserber()
         this.selectObserver?.subscribe((value)=>{
             this.cbSelected.forEach((cb)=>{
-                cb({select:value.select})
+                cb({select:value.select,obj:null})
             })
         })
     }

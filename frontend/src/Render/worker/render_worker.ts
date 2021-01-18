@@ -115,7 +115,8 @@ function __setSelectEventObserber(){
     let render = obj_check();
     return new Observable<SelectedEvent>((observer)=>{
         render.addSelectedEvent((event)=>{
-            observer.next(event);
+            let mes = {select:event.select,obj:null} // cannot send obj
+            observer.next(mes);
         })
     })
 }

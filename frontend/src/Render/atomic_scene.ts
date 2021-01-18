@@ -9,12 +9,21 @@ export class AtomicScene{
     private system?: System;
     private gatomics?: THREE.Group;
     private gbonds?: THREE.Group;
+    private obj3d_selected_atom: Object3D;
 
     /** 重心 */
     private accumPos: Vector3;
 
     constructor(){
         this.accumPos = new Vector3(0,0,0);
+
+        const cube = new THREE.SphereGeometry(0.7,cube_segments,cube_segments);
+            
+        var meshopt = {}
+        meshopt = {color:0xffffff,wireframe:true}
+        const material = new THREE.MeshBasicMaterial(meshopt);
+        
+        this.obj3d_selected_atom = new THREE.Mesh(cube, material);
     }
 
     /**
@@ -152,6 +161,24 @@ export class AtomicScene{
         this.accumPos = new Vector3(0,0,0);
         this.gatomics = undefined;
         this.gbonds = undefined;
+    }
+
+    /**
+     * 
+     * @param obj 
+     */
+    hilight_atom(obj: Object3D|null){
+        console.log("hilight_atom:")
+        if (obj != null){
+            console.log("obj is not null")
+            this.obj3d_selected_atom.position.set(obj?.position.x,obj?.position.y,obj?.position.z);
+
+            obj?.parent?.add(this.obj3d_selected_atom)
+        }
+        else{
+            console.log("obj is null")
+            this.gatomics?.remove(this.obj3d_selected_atom)
+        }
     }
 
 }
