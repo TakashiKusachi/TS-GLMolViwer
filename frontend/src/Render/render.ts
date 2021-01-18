@@ -195,7 +195,7 @@ export abstract class Render{
      */
     selected(obj:Object3D|null,name: string){
         this.cbSelected.forEach((cb)=>{
-            cb({select:name})
+            cb({select:name,obj:obj})
         })
     }
 
@@ -254,10 +254,14 @@ export class AtomicRender extends Render implements IAtomicRender{
         this.system = null;
         this.atomicScene = new AtomicScene();
         this.clearScene();
+        this.addSelectedEvent((e)=>{this.__selected(e)})
     }
 
     async init(){
+    }
 
+    async __selected(select: SelectedEvent){
+        this.atomicScene.hilight_atom(select.obj)
     }
 
     async setSystem(system: System){

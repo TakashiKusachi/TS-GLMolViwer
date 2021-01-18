@@ -17,6 +17,7 @@ export type AnyCanvas = HTMLCanvasElement| _OffscreenCanvas;
 
 export interface SelectedEvent{
     select: string;
+    obj: Object3D|null;
 }
 
 export interface IAtomicRender{
