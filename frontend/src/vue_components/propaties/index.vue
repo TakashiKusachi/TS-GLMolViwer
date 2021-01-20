@@ -10,9 +10,9 @@
         <div v-show="isAtomNotNull">
             Name: {{atomName}}<br>
             Position:<br>
-            x: <input type="text" :value="atomPx"/><br>
-            y: <input type="text" :value="atomPy"/><br>
-            z: <input type="text" :value="atomPz"/><br>
+            x: <input type="text" :value="atomPx" v-on:input="setAtomPx = $event.target.value"/><br>
+            y: <input type="text" :value="atomPy" v-on:input="setAtomPy = $event.target.value"/><br>
+            z: <input type="text" :value="atomPz" v-on:input="setAtomPz = $event.target.value"/><br>
         </div>
     </div>
 </template>
@@ -31,6 +31,7 @@
         height: auto;
         width: 100%;
         input {
+            font-size: 1em;
             border: none;
         }
     }
@@ -73,12 +74,47 @@ export default class Propaties extends Vue{
             return this.atom.name
         }
     }
+
+    /**
+     * parseFloatで例外を発生させるための関数
+     * 
+     * @param value numberの数値に変換する文字列
+     * @throws 数値に変換できない文字列を入力したときに発生します。
+     */
+    __parse2Float(value:string):number{
+        let num: number = parseFloat(value)
+        if(isNaN(num)){
+            throw "invalid error ["+value+"]"
+        }
+        return num
+    }
+    set setAtomPx(value:string){
+        try{
+            if(this.atom != null){
+                this.atom.position[0] = this.__parse2Float(value)
+            }
+        }
+        catch(e){
+            console.log(e)
+        }   
+    }
     get atomPx(){
         if(this.atom == null){
             return "";
         }
         else {
             return this.atom.position[0]
+        }
+    }
+
+    set setAtomPy(value:string){
+        try{
+            if(this.atom != null){
+                this.atom.position[1] = this.__parse2Float(value)
+            }
+        }
+        catch(e){
+            console.log(e)
         }
     }
     get atomPy(){
@@ -88,7 +124,19 @@ export default class Propaties extends Vue{
         else {
             return this.atom.position[1]
         }
-}    get atomPz(){
+    }
+
+    set setAtomPz(value:string){
+        try{
+            if(this.atom != null){
+                this.atom.position[2] =  this.__parse2Float(value)
+            }
+        }
+        catch(e){
+            console.log(e)
+        }
+    }
+    get atomPz(){
         if(this.atom == null){
             return "";
         }
@@ -96,6 +144,5 @@ export default class Propaties extends Vue{
             return this.atom.position[2]
         }
     }
-
 }
 </script>
