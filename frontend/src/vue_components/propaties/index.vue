@@ -10,9 +10,9 @@
         <div v-show="isAtomNotNull">
             Name: {{atomName}}<br>
             Position:<br>
-            x: {{atomPx}}<br>
-            y: {{atomPy}}<br>
-            z: {{atomPz}}<br>
+            x: <input type="text" :value="atomPx"/><br>
+            y: <input type="text" :value="atomPy"/><br>
+            z: <input type="text" :value="atomPz"/><br>
         </div>
     </div>
 </template>
@@ -30,6 +30,9 @@
         display: block;
         height: auto;
         width: 100%;
+        input {
+            border: none;
+        }
     }
 }
 </style>
