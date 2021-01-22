@@ -9,6 +9,7 @@ import {MatStdControl} from "../control/MatStdControl"
 
 import {AnyCanvas,SelectedEvent,IAtomicRender} from "."
 import {AtomicScene} from "./atomic_scene"
+import { positionChange } from './worker/dao';
 
 export type DMouseEvent = {
     clientX:number,clientY:number,button:number,
@@ -301,5 +302,9 @@ export class AtomicRender extends Render implements IAtomicRender{
     tickCallBack(sec:TickCallBack){
         if(this.tickCallers === undefined)return;
         this.tickCallers.forEach(cb=>cb(sec));
+    }
+
+    changePosition(obj: positionChange){
+        this.atomicScene.
     }
 }

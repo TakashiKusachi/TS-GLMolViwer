@@ -3,13 +3,22 @@ import {Observable,Subject} from "threads/observable"
 import {TransferDescriptor} from 'threads'
 
 import {AtomicRender,TickCallBack} from "../render"
+import {AtomicScene} from "../atomic_scene"
 import {AnyCanvas,_OffscreenCanvas,SelectedEvent} from "../"
 import {DMouseEvent,DWheelEvent} from "../../control/MatStdControl"
 import { System } from '../../systems';
+import { positionChange } from './dao'
 import { observable } from "vue/types/umd"
 
 let obj: AtomicRender|undefined;
 
+/**
+ * プロセスが終了したことをホストプロセスに通知を行うためのobserverを返す関数
+ * 
+ * threads.jsを用いてプロセスのリターンを返すときに、observableオブジェクトを返す必要があるためそのパーサー
+ * 同期的に値を返す場合はこの関数を用いず値を返せばよい。また、何も返す必要が無ければvoidでよい。
+ * @param process 終了通知を行うプロセスのPromise
+ */
 function completedReturn(process: Promise<void>):Observable<void>{
     return new Observable<void>((observable)=>{
         process.then(()=>{
@@ -33,7 +42,7 @@ const render_worker = {
     __setSelectEventObserber,
     __setTickCallBack,
 
-    /**Event Handler */
+    /**Recieve Event Handler */
     click,
     mouseMove,
     mouseUp,
@@ -84,6 +93,11 @@ function stop(){
 function deleteAtom(name: string){
     let render = obj_check();
     render.deleteAtom(name);
+}
+
+function changePosition(obj: positionChange ){
+    let render = obj_check();
+    render.changePosition(obj);
 }
 
 function click(mouse_x:number,mouse_y:number){

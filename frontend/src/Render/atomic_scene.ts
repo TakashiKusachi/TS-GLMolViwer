@@ -4,6 +4,7 @@ import {Scene,Vector3, Object3D} from 'three'
 
 import {cube_segments,bond_radius,bond_segments,default_colors,atoms_layer,bonds_layer} from "./parameters"
 import {System,IAtom} from "../systems"
+import { positionChange } from './worker/dao';
 
 export class AtomicScene{
     private system?: System;
@@ -180,5 +181,4 @@ export class AtomicScene{
             this.gatomics?.remove(this.obj3d_selected_atom)
         }
     }
-
 }
