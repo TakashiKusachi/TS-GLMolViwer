@@ -39,7 +39,7 @@
 </style>
 
 <script lang="ts">
-import {System,Atom} from "../../systems"
+import {System,IAtom} from "../../systems"
 
 import Component from "vue-class-component";
 import {Vue,Prop,Emit} from "vue-property-decorator";
@@ -54,7 +54,7 @@ export default class Propaties extends Vue{
     private system!:System|null;
 
     @Prop()
-    private atom!:Atom|null;
+    private atom!:IAtom|null;
 
     constructor(){
         super();
@@ -91,7 +91,7 @@ export default class Propaties extends Vue{
     set setAtomPx(value:string){
         try{
             if(this.atom != null){
-                this.atom.position[0] = this.__parse2Float(value)
+                //this.atom.position[0] = this.__parse2Float(value)
             }
         }
         catch(e){
@@ -110,7 +110,7 @@ export default class Propaties extends Vue{
     set setAtomPy(value:string){
         try{
             if(this.atom != null){
-                this.atom.position[1] = this.__parse2Float(value)
+                //this.atom.position[1] = this.__parse2Float(value)
             }
         }
         catch(e){
@@ -129,7 +129,7 @@ export default class Propaties extends Vue{
     set setAtomPz(value:string){
         try{
             if(this.atom != null){
-                this.atom.position[2] =  this.__parse2Float(value)
+                //this.atom.position[2] =  this.__parse2Float(value)
             }
         }
         catch(e){

@@ -27,8 +27,9 @@
 
 import {System} from "../../systems"
 import {IAtomicRender,SelectedEvent} from "../../Render"
-import {OnAtomicRender,WorkerAtomicRender} from "../../Render"
+import {WorkerAtomicRender} from "../../Render"
 import {InvalidIdError} from "../../errorHandler"
+import {chartWorker,WorkerHandler} from "../../Render/worker_interface/worker_handler"
 
 import Component from "vue-class-component";
 import {Vue,Prop,Emit, Watch} from "vue-property-decorator";
@@ -44,23 +45,28 @@ export default class Viwer extends Vue{
     @Prop({required:true})
     private system!: System|null;
 
+    private worker: WorkerHandler|null = null;
+
     constructor(){
         super();
     }
 
-    mounted(){
+    async mounted(){
         this.busy();
-        try{
-            const canvas = document.querySelector("#gl_canvas") as HTMLCanvasElement ;
-            if (canvas === null) throw new InvalidIdError(`#gl_canvasが存在しません。`);
-            this.renderer = new WorkerAtomicRender(canvas);
-        }catch(e){
-            alert("エラーが発生しました。");
-            throw e;
-        }
-        this.renderer.init().then(()=>{
-            this.renderer?.addSelectedEvent((e:SelectedEvent)=>{this.selectAtom(e)})
-            this.ready();
+        await chartWorker().then((worker)=>{
+            this.worker = worker
+            try{
+                const canvas = document.querySelector("#gl_canvas") as HTMLCanvasElement ;
+                if (canvas === null) throw new InvalidIdError(`#gl_canvasが存在しません。`);
+                this.renderer = new WorkerAtomicRender(canvas,this.worker);
+            }catch(e){
+                alert("エラーが発生しました。");
+                throw e;
+            }
+            this.renderer.init().then(()=>{
+                this.renderer?.addSelectedEvent((e:SelectedEvent)=>{this.selectAtom(e)})
+                this.ready();
+            })
         })
     }
 

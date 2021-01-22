@@ -2,13 +2,12 @@ import { expose,Transfer } from "threads/worker"
 import {Observable,Subject} from "threads/observable"
 import {TransferDescriptor} from 'threads'
 
-import {AtomicRender,TickCallBack} from "../render"
-import {AtomicScene} from "../atomic_scene"
+import {AtomicRender,TickCallBack} from "./render"
+import {AtomicScene} from "./atomic_scene"
 import {AnyCanvas,_OffscreenCanvas,SelectedEvent} from "../"
 import {DMouseEvent,DWheelEvent} from "../../control/MatStdControl"
 import { System } from '../../systems';
 import { positionChange } from './dao'
-import { observable } from "vue/types/umd"
 
 let obj: AtomicRender|undefined;
 
@@ -27,7 +26,15 @@ function completedReturn(process: Promise<void>):Observable<void>{
     })
 }
 
+const system_worker = {
+    natoms:()=>{
+        let render = obj_check();
+        return render.getSystem()?.natoms;
+    }
+}
+
 const render_worker = {
+    /** test */
     init,
     setSystem,
     clearScene,
@@ -50,6 +57,7 @@ const render_worker = {
     wheel,
 }
 
+/**  */
 function init(canvas: AnyCanvas|TransferDescriptor<AnyCanvas>,height: number,width:number){
     let offcanvas = canvas as _OffscreenCanvas;
     offcanvas.style = {height:height,width:width};
@@ -152,6 +160,6 @@ function obj_check(): AtomicRender{
     return obj as AtomicRender;
 }
 
-
-export type RenderWorker = typeof render_worker;
-expose(render_worker)
+const worker = {...system_worker,...render_worker}
+export type RenderWorker = typeof worker;
+expose(worker)

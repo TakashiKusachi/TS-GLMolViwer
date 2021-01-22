@@ -1,18 +1,25 @@
+/**
+ * host側(メインスレッド側)のレンダー
+ */
 
 import { Object3D, Vector3, Raycaster, Vector2, GridHelper, Group } from 'three';
 import {Worker,spawn,Thread,ModuleThread,Transfer} from 'threads'
 import Stats from 'three/examples/jsm/libs/stats.module';
 
-import { System } from '../systems';
-import {RenderWorker} from "./worker/render_worker"
-import {AnyCanvas,SelectedEvent,IAtomicRender,_OffscreenCanvas} from "."
-import {NotSupportOffscreenCanvas} from "./errorHandler"
-import {AtomicRender,TickCallBack} from "./render"
-import { DMouseEvent,DWheelEvent } from '../control/MatStdControl';
+import { System } from '../../systems';
+import {RenderWorker} from "../worker/render_worker"
+import {AnyCanvas,SelectedEvent,IAtomicRender,_OffscreenCanvas} from ".."
+import {NotSupportOffscreenCanvas} from "../errorHandler"
+import {AtomicRender,TickCallBack} from "../worker/render"
+import { DMouseEvent,DWheelEvent } from '../../control/MatStdControl';
 import { Observable } from 'threads/observable';
 import { resolve } from 'path';
+import {WorkerHandler} from "./worker_handler"
 
-
+/**
+ * Canvas要素のイベントハンドラを設定する基本クラス。
+ * addEventListenerが長いので、抽象関数を渡してあげて、実装はメンバ関数のみ作れば良いようにした。
+ */
 abstract class CanvasEventHandler{
     
     private stats: Stats;
@@ -92,6 +99,10 @@ abstract class CanvasEventHandler{
 
 }
 
+/**
+ * Renderとして動作し、workerスレッドにメッセージを送るクラス。
+ * canvasからのイベントは、CanvasEventHandlerによって当該メソッドが呼ばれるようになっている。
+ */
 export class WorkerAtomicRender extends CanvasEventHandler implements IAtomicRender{
 
     private system: System | null = null;
@@ -99,16 +110,17 @@ export class WorkerAtomicRender extends CanvasEventHandler implements IAtomicRen
 
     private selectObserver: Observable<SelectedEvent> | undefined;
     private cbSelected: Array<(event:SelectedEvent)=>void> = [];
-    private worker: ModuleThread<RenderWorker>|null = null;
+    private worker: WorkerHandler;
 
-    constructor(_canvas:AnyCanvas){
+    constructor(_canvas:AnyCanvas,hand_worker:WorkerHandler){
         super(_canvas as HTMLCanvasElement);
         this.canvas = _canvas as HTMLCanvasElement;
+        this.worker = hand_worker;
     }
 
     async init(){
-        console.log("init")
-        this.worker = await spawn<RenderWorker>(new Worker("./worker/render_worker.ts"));
+        //console.log("init")
+        //this.worker = await spawn<RenderWorker>(new Worker("./worker/render_worker.ts"));
 
         if(this.canvas.transferControlToOffscreen === undefined)throw new NotSupportOffscreenCanvas(`${this.canvas.id}はoffscreencanvasに対応していません。`)
         let canvas = this.canvas.transferControlToOffscreen() as _OffscreenCanvas;
@@ -196,90 +208,4 @@ export class WorkerAtomicRender extends CanvasEventHandler implements IAtomicRen
         this.stats_update();
     }
 
-}
-
-
-/**
- * 継承関係じゃなくてもいい気はする。
- */
-export class OnAtomicRender extends CanvasEventHandler implements IAtomicRender{
-    private render: AtomicRender|undefined;
-    private system: System | null;
-    private canvas: HTMLCanvasElement;
-
-    constructor(_canvas:AnyCanvas){
-        super(_canvas as HTMLCanvasElement);
-        this.canvas = _canvas as HTMLCanvasElement;
-        this.system = null;
-
-        //this.resize();
-    }
-    
-    async init(){
-        this.render = new AtomicRender(this.canvas);
-        this.f_resize(this.canvas);
-        this.render.setTickCallBack((sec)=>this.tick(sec));
-    }
-
-    get isRun(){
-        return new Promise<boolean>((resolve)=>{
-            if(this.render === undefined)throw new Error("Not initialize of render")
-            resolve(this.render.isRun);
-        })
-    }
-
-    async start(){
-        if(this.render === undefined)throw new Error("Not initialize of render")
-        this.render.start();
-    }
-    
-    async stop(){
-        if(this.render === undefined)throw new Error("Not initialize of render")
-        this.render.stop();
-    }
-
-    async setSystem(system:System){
-        await this.render?.setSystem(system);
-    }
-
-    async clearScene(){
-        this.render?.clearScene();
-    }
-
-    addSelectedEvent(callback: (event:SelectedEvent)=>void){
-        this.render?.addSelectedEvent(callback);
-    }
-
-    async deleteAtom(name:string){
-        this.render?.deleteAtom(name);
-    }
-
-    resize(height:number,width:number){
-        this.render?.resize(height,width)
-    }
-
-    click(mouse_x:number,mouse_y:number){
-        this.render?.click(mouse_x,mouse_y);
-    }
-
-    mouseUp(event:DMouseEvent){
-        this.render?.control.mouseUp(event);
-    }
-
-    mouseMove(event: DMouseEvent){
-        this.render?.control.mousemove(event);
-    }
-
-    mouseDown(event:DMouseEvent){
-        this.render?.control.mouseDown(event);
-    };
-    
-    wheel(event: WheelEvent){
-        this.render?.control.wheel(event);
-    }
-
-    tick(sec:TickCallBack){
-        this.stats_update();
-
-    }
 }

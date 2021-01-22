@@ -84,7 +84,7 @@ $FOTTER_SIZE    : 20px;
 
 <script lang="ts">
 import {IAtomicRender,SelectedEvent} from "../Render"
-import {OnAtomicRender,WorkerAtomicRender} from "../Render"
+import {WorkerAtomicRender} from "../Render"
 import {AtomicsParsers,tryParseResult} from "../parser/parser"
 import {System} from "../systems"
 import {InvalidIdError} from "../errorHandler"

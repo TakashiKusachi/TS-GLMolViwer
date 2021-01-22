@@ -2,14 +2,14 @@
 import * as THREE from 'three';
 import { Object3D, Vector3, Raycaster, Vector2, GridHelper, Group } from 'three';
 
-import {System} from "../systems"
-import {cube_segments,bond_radius,bond_segments,default_colors, atoms_layer} from "./parameters"
-import {MatStdControl} from "../control/MatStdControl"
+import {System} from "../../systems"
+import {cube_segments,bond_radius,bond_segments,default_colors, atoms_layer} from "../parameters"
+import {MatStdControl} from "../../control/MatStdControl"
 
 
-import {AnyCanvas,SelectedEvent,IAtomicRender} from "."
+import {AnyCanvas,SelectedEvent,IAtomicRender} from ".."
 import {AtomicScene} from "./atomic_scene"
-import { positionChange } from './worker/dao';
+import { positionChange } from './dao';
 
 export type DMouseEvent = {
     clientX:number,clientY:number,button:number,
@@ -285,6 +285,10 @@ export class AtomicRender extends Render implements IAtomicRender{
         return ret;
     }
     
+    getSystem(){
+        return this.system
+    }
+
     async deleteAtom(name:string){
         this.atomicScene.deleteAtom(name);
     }
@@ -305,6 +309,6 @@ export class AtomicRender extends Render implements IAtomicRender{
     }
 
     changePosition(obj: positionChange){
-        this.atomicScene.
+        this.atomicScene;
     }
 }

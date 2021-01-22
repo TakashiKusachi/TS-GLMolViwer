@@ -2,9 +2,9 @@
 import * as THREE from 'three'
 import {Scene,Vector3, Object3D} from 'three'
 
-import {cube_segments,bond_radius,bond_segments,default_colors,atoms_layer,bonds_layer} from "./parameters"
-import {System,IAtom} from "../systems"
-import { positionChange } from './worker/dao';
+import {cube_segments,bond_radius,bond_segments,default_colors,atoms_layer,bonds_layer} from "../parameters"
+import {System,IAtom} from "../../systems"
+import { positionChange } from './dao';
 
 export class AtomicScene{
     private system?: System;

@@ -18,27 +18,31 @@ function elemStr2Type(name: string): ElemType{
 }
 
 export type Position = Array<number>;
+export type ReadonlyPosition = ReadonlyArray<number>
 export type Name = string;
 
 export interface IAtom{
-    position: Position;
-    name: Name;
-    element: ElemType;
-    index: number;
+    readonly position: ReadonlyPosition;
+    readonly name: Name;
+    readonly element: ElemType;
+    readonly index: number;
+    readonly system: System;
+    changePosition(newPosition:Position|ReadonlyPosition):void;
 }
 
 export type AtomConstructorArgument={
     name: Name,
     index: number,
     element?: ElemType,
-    position?: Position,
+    position?: Position | ReadonlyPosition,
 }
 
 export class Atom implements IAtom{
-    private _position: Position;
+    private readonly _position: ReadonlyPosition;
     private _name : Name;
     private _element: ElemType;
     private _index: number;
+    public readonly system: System;
 
     constructor(
         {
@@ -47,11 +51,13 @@ export class Atom implements IAtom{
             element = ElemType.ANY,
             position = [0,0,0],
         }:AtomConstructorArgument
+        ,parentSystem:System
     ){
             this._position = position;
             this._name = name;
             this._element = element;
             this._index = index;
+            this.system = parentSystem;
     }
 
     get position(){
@@ -68,6 +74,9 @@ export class Atom implements IAtom{
     get index(){
         return this._index;
     }
+    changePosition(newPosition:Position|ReadonlyPosition){
+        this.system.changePosition(this.name,newPosition)
+    }
 
 }
 
@@ -82,7 +91,7 @@ export interface IBond<AtomType extends IAtom = IAtom>{
 }
 
 
-class Bond implements IBond<Atom>{
+export class Bond implements IBond<Atom>{
     private _atoma: Atom;
     private _atomb: Atom;
     private _bond_type: BondType;
@@ -140,6 +149,8 @@ export interface ISystem<AtomType extends IAtom,BondType extends IBond<AtomType>
     atomIndexOf(name:string): number;
     getAtoms():Generator<AtomType,string,unknown>;
     getBond():Generator<BondType,void,unknown>;
+
+    changePosition(name:string,newPosition:Position|ReadonlyPosition):void;
 }
 
 
@@ -185,7 +196,7 @@ export class System implements ISystem<Atom,Bond>{
         return ret;
     }
 
-    add_atom(name: Name|null, position:Position, element:ElemType){
+    add_atom(name: Name|null, position:Position|ReadonlyPosition, element:ElemType){
         
         if(name == null || name==""){
             name = "Atom"+this.N_undef_atoms++;
@@ -196,7 +207,7 @@ export class System implements ISystem<Atom,Bond>{
         }
 
         this.names.push(name);
-        this.positions.push(position);
+        this.positions.push(position.slice());
         this.elements.push(element);
     }
 
@@ -235,7 +246,7 @@ export class System implements ISystem<Atom,Bond>{
             index: index,
             element: this.elements[index],
             position: this.positions[index],
-        })
+        },this)
     }
 
     atomIndexOf(name: string):number{
@@ -250,7 +261,7 @@ export class System implements ISystem<Atom,Bond>{
                 index: i,
                 element: this.elements[i],
                 position: this.positions[i],
-            })
+            },this)
             yield c_atom;
         }
         return "Done";
@@ -264,6 +275,13 @@ export class System implements ISystem<Atom,Bond>{
                 this.bond_types[i],
             )
         }
+    }
+    changePosition(name:string,newPosition:Position|ReadonlyPosition){
+        let num = this.names.findIndex((value)=>value==name)
+        if(num == -1){
+            throw "changePosition: not found ["+name+"] atom"
+        }
+        this.positions[num] = newPosition.slice();
     }
 }
 

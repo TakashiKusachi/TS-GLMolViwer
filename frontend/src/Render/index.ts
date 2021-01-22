@@ -1,6 +1,6 @@
 
 import { System } from '../systems';
-import {WorkerAtomicRender,OnAtomicRender} from "./renderInter"
+import {WorkerAtomicRender} from "./worker_interface/renderInter"
 import { Object3D } from 'three';
 
 type Style={
@@ -32,4 +32,4 @@ export interface IAtomicRender{
     addSelectedEvent: (callbacl: (event:SelectedEvent)=>void)=>void;
 }
 
-export {WorkerAtomicRender,OnAtomicRender}
+export {WorkerAtomicRender}
